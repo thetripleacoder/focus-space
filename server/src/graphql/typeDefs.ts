@@ -11,6 +11,7 @@ export const typeDefs = gql`
     text: String
     mediaUrl: String
     mediaType: String
+    createdAt: String
   }
 
   type Query {
