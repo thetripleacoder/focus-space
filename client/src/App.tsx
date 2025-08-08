@@ -1,14 +1,17 @@
-import { ApolloProvider } from '@apollo/client';
-import { client } from './graphql/client';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Tabs from './components/Tabs';
+import Home from './pages/Home';
+import Profile from './pages/Profile';
 
 function App() {
   return (
-    <ApolloProvider client={client}>
-      <div className="p-4 text-center">
-        <h1 className="text-2xl font-bold">FocusDock</h1>
-        <p>React + GraphQL + Electron starter</p>
-      </div>
-    </ApolloProvider>
+    <Router>
+      <Tabs />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
+      </Routes>
+    </Router>
   );
 }
 
