@@ -1,6 +1,8 @@
 import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`
+  scalar Upload
+
   type User {
     id: ID!
     username: String!
@@ -20,7 +22,8 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    login(username: String!): String
+    register(username: String!, password: String!): User
+    login(username: String!, password: String!): String
     createPost(text: String, mediaUrl: String, mediaType: String): Post
   }
 

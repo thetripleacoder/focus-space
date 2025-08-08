@@ -1,5 +1,7 @@
 import { useQuery } from '@apollo/client';
 import { ME } from '../graphql/queries';
+import RegisterForm from '../components/RegisterForm';
+import Login from '../components/Login';
 
 const Profile = () => {
   const { data, loading, error } = useQuery(ME);
@@ -9,21 +11,35 @@ const Profile = () => {
 
   const user = data?.me;
 
-  if (!user) {
-    return <p>You are not logged in.</p>;
-  }
-
   return (
     <div style={{ padding: '1rem' }}>
       <h2>👤 Profile</h2>
-      <p><strong>ID:</strong> {user.id}</p>
-      <p><strong>Username:</strong> {user.username}</p>
-      <button onClick={() => {
-        localStorage.removeItem('token');
-        window.location.reload();
-      }}>
-        Logout
-      </button>
+
+      {user ? (
+        <>
+          <p>
+            <strong>ID:</strong> {user.id}
+          </p>
+          <p>
+            <strong>Username:</strong> {user.username}
+            <strong>Password:</strong> {user.password}
+          </p>
+          <button
+            onClick={() => {
+              localStorage.removeItem('token');
+              window.location.reload();
+            }}
+          >
+            Logout
+          </button>
+        </>
+      ) : (
+        <>
+          <p>You are not logged in.</p>
+          <Login />
+          <RegisterForm />
+        </>
+      )}
     </div>
   );
 };

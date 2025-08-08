@@ -1,39 +1,55 @@
 import { useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
+import { LOGIN } from '../graphql/mutations';
 
-const LOGIN = gql`
-  mutation Login($username: String!) {
-    login(username: $username)
-  }
-`;
-
-export default function Login() {
+const Login = () => {
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [login, { loading, error }] = useMutation(LOGIN);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const res = await login({ variables: { username } });
-      const token = res.data.login;
-      localStorage.setItem('token', token);
-      window.location.reload(); // refresh to reload auth headers
-    } catch (e) {
-      console.error(e);
+      const result = await login({ variables: { username, password } });
+      localStorage.setItem('token', result.data.login);
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
     }
   };
 
   return (
-    <div style={{ marginBottom: '1rem' }}>
+    <form onSubmit={handleLogin}>
+      <h3>Login</h3>
       <input
-        type="text"
-        placeholder="Username"
+        type='text'
+        placeholder='Username'
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+        required
       />
-      <button onClick={handleLogin} disabled={loading}>
-        {loading ? 'Logging in...' : 'Login'}
+      <input
+        type={showPassword ? 'text' : 'password'}
+        placeholder='Password'
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      <label>
+        <input
+          type='checkbox'
+          checked={showPassword}
+          onChange={() => setShowPassword((prev) => !prev)}
+        />
+        Show Password
+      </label>
+      <button type='submit' disabled={loading}>
+        Login
       </button>
-      {error && <p style={{ color: 'red' }}>Login failed</p>}
-    </div>
+      {error && <p style={{ color: 'red' }}>{error.message}</p>}
+    </form>
   );
-}
+};
+
+export default Login;

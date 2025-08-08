@@ -4,4 +4,5 @@ export interface Post {
   mediaUrl?: string;
   mediaType?: string;
   createdAt: string;
+  timestamp: string;
 }
