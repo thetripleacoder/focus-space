@@ -16,6 +16,10 @@ export const typeDefs = gql`
     createdAt: String
   }
 
+  type FileResponse {
+    mediaUrl: String!
+  }
+
   type Query {
     me: User
     posts: [Post]
@@ -25,6 +29,7 @@ export const typeDefs = gql`
     register(username: String!, password: String!): User
     login(username: String!, password: String!): String
     createPost(text: String, mediaUrl: String, mediaType: String): Post
+    uploadFile(file: Upload!): FileResponse! # <-- Added
   }
 
   type Subscription {

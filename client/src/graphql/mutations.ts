@@ -7,7 +7,6 @@ export const CREATE_POST = gql`
       text
       mediaUrl
       mediaType
-      createdAt
     }
   }
 `;

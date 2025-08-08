@@ -1,12 +1,16 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { PubSub } from 'graphql-subscriptions';
+import { GraphQLUpload } from 'graphql-upload-ts';
+import { v2 as cloudinary } from 'cloudinary';
 import User from '../models/User';
 import Post from '../models/Post';
 
 const pubsub = new PubSub();
 
 export const resolvers = {
+  Upload: GraphQLUpload, // ✅ for scalar Upload
+
   Query: {
     me: async (_: any, __: any, context: any) => context.currentUser,
     posts: async () => await Post.find({}),
@@ -54,6 +58,26 @@ export const resolvers = {
       const savedPost = await post.save();
       pubsub.publish('POST_ADDED', { postAdded: savedPost });
       return savedPost;
+    },
+
+    // ✅ New GraphQL upload mutation
+    uploadFile: async (_: any, { file }: any) => {
+      const { createReadStream, filename, mimetype } = await file;
+
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'focus-space', resource_type: 'auto' },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+
+        createReadStream().pipe(stream);
+      });
+
+      const result: any = await uploadPromise;
+      return { mediaUrl: result.secure_url };
     },
   },
 

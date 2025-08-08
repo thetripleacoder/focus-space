@@ -12,7 +12,7 @@ interface Props {
 const PostInput = ({ onSubmit, currentUser }: Props) => {
   const [text, setText] = useState('');
   const [media, setMedia] = useState<File | null>(null);
-  const [createPost] = useMutation(CREATE_POST);
+  const [createPost] = useMutation<{ createPost: Post }>(CREATE_POST);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
@@ -24,13 +24,13 @@ const PostInput = ({ onSubmit, currentUser }: Props) => {
       return;
     }
 
-    let mediaUrl: string | undefined;
-    let mediaType: string | undefined;
+    let mediaUrl: string | undefined = undefined;
+    let mediaType: string | undefined = undefined;
 
-    // 1️⃣ If there's a file, upload it first
     if (media) {
       const formData = new FormData();
       formData.append('file', media);
+      console.log(formData);
 
       try {
         const uploadRes = await fetch('http://localhost:4000/upload', {
@@ -41,23 +41,32 @@ const PostInput = ({ onSubmit, currentUser }: Props) => {
         if (!uploadRes.ok) throw new Error('Failed to upload file');
 
         const uploadData = await uploadRes.json();
-        mediaUrl = uploadData.url; // Cloudinary URL
-        mediaType = uploadData.mediaType; // "image" or "video"
+
+        mediaUrl = uploadData.mediaUrl; // server returns mediaUrl
+        mediaType = media.type.startsWith('image') ? 'image' : 'video';
       } catch (err) {
         console.error('File upload failed:', err);
         return;
       }
     }
 
-    // 2️⃣ Save post in MongoDB through GraphQL
     try {
-      const { data } = await createPost({
-        variables: {
-          text,
-          mediaUrl,
-          mediaType,
-        },
-      });
+      const variables: {
+        text?: string;
+        mediaUrl?: string;
+        mediaType?: string;
+      } = {};
+
+      if (text.trim() !== '') variables.text = text.trim();
+      if (mediaUrl) variables.mediaUrl = mediaUrl;
+      if (mediaType) variables.mediaType = mediaType;
+      if (Object.keys(variables).length === 0) {
+        console.warn('No content to post');
+        return;
+      }
+      console.log(variables);
+
+      const { data } = await createPost({ variables });
 
       if (data?.createPost) {
         onSubmit(data.createPost);

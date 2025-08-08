@@ -30,6 +30,7 @@ const Home = () => {
   useEffect(() => {
     if (data?.posts) {
       setPosts(data.posts);
+      console.log(data);
     }
   }, [data]);
 

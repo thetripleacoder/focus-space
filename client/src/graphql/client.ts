@@ -3,7 +3,7 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 
-// HTTP link for queries and mutations
+// Use normal HttpLink because file upload is handled separately by REST
 const httpLink = new HttpLink({
   uri: 'http://localhost:4000/graphql',
   headers: {
@@ -21,7 +21,7 @@ const wsLink = new GraphQLWsLink(
   })
 );
 
-// Use split to send data to each link depending on operation type
+// Split based on operation type
 const splitLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query);
@@ -37,4 +37,7 @@ const splitLink = split(
 export const client = new ApolloClient({
   link: splitLink,
   cache: new InMemoryCache(),
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
