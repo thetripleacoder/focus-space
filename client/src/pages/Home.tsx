@@ -7,6 +7,7 @@ import PostCard from '../components/PostCard';
 import { GET_POSTS, ME } from '../graphql/queries';
 import { POST_ADDED } from '../graphql/subscriptions';
 import type { Post } from '../types/post';
+import Layout from '../components/Layout';
 
 const Home = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -49,14 +50,16 @@ const Home = () => {
   if (error) return <p>Error loading posts 😢</p>;
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h2>Home</h2>
-      <PostInput onSubmit={handleNewPost} currentUser={userData?.me} />
+    <Layout>
+      <div className='test'>Tailwind test</div>
 
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
-    </div>
+      <PostInput onSubmit={handleNewPost} currentUser={userData?.me} />
+      <div className='space-y-4 mt-6'>
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
+      </div>
+    </Layout>
   );
 };
 

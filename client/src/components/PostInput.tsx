@@ -80,20 +80,28 @@ const PostInput = ({ onSubmit, currentUser }: Props) => {
   };
 
   return (
-    <div style={{ marginBottom: '1rem' }}>
+    <div className='bg-white rounded-lg shadow p-4 mb-6'>
       <textarea
         placeholder="What's on your mind?"
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={3}
-        style={{ width: '100%' }}
+        className='w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500'
       />
-      <input
-        type='file'
-        accept='image/*,video/*'
-        onChange={(e) => setMedia(e.target.files?.[0] ?? null)}
-      />
-      <button onClick={handleSubmit}>Post</button>
+      <div className='mt-3 flex items-center justify-between'>
+        <input
+          type='file'
+          accept='image/*,video/*'
+          onChange={(e) => setMedia(e.target.files?.[0] ?? null)}
+          className='text-sm text-gray-600'
+        />
+        <button
+          onClick={handleSubmit}
+          className='bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition'
+        >
+          Post
+        </button>
+      </div>
     </div>
   );
 };

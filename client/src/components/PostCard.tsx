@@ -11,12 +11,18 @@ const PostCard = ({ post }: Props) => {
     if (!mediaUrl || !mediaType) return null;
 
     if (mediaType === 'image') {
-      return <img src={mediaUrl} alt='post' style={{ maxWidth: '100%' }} />;
+      return (
+        <img
+          src={mediaUrl}
+          alt='post'
+          className='rounded-lg w-full max-h-[500px] object-cover mt-3'
+        />
+      );
     }
 
     if (mediaType === 'video') {
       return (
-        <video controls style={{ maxWidth: '100%' }}>
+        <video controls className='rounded-lg w-full max-h-[500px] mt-3'>
           <source src={mediaUrl} type='video/mp4' />
           Your browser does not support the video tag.
         </video>
@@ -27,14 +33,8 @@ const PostCard = ({ post }: Props) => {
   };
 
   return (
-    <div
-      style={{
-        border: '1px solid #ccc',
-        padding: '1rem',
-        marginBottom: '1rem',
-      }}
-    >
-      {text && <p>{text}</p>}
+    <div className='bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200'>
+      {text && <p className='text-gray-800 text-base'>{text}</p>}
       {renderMedia()}
     </div>
   );
