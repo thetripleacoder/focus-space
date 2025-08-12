@@ -9,7 +9,15 @@ const blogSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
+  genres: [String],
   comments: [{ text: String, author: String, date: Date }],
+  likedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
+  createdAt: { type: Date, default: Date.now },
 });
 
 blogSchema.set('toJSON', {

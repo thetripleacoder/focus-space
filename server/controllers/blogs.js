@@ -2,77 +2,96 @@ const Blog = require('../models/blog');
 const blogsRouter = require('express').Router();
 require('express-async-errors');
 
+// Get all blogs with user and likedBy populated
 blogsRouter.get('/', async (request, response) => {
-  // Blog.find({}).then((blogs) => {
-  //   response.json(blogs);
-  // });
+  const blogs = await Blog.find({})
+    .populate('user', { username: 1, name: 1 })
+    .populate('likedBy', { username: 1, name: 1 });
 
-  const blogs = await Blog.find({}).populate('user');
   response.json(blogs);
 });
 
+// Create new blog
 blogsRouter.post('/', async (request, response) => {
-  if (request.body.title !== undefined) {
-    const blog = new Blog({ ...request.body, user: request.user._id });
+  const { title, author, url, genres } = request.body;
 
-    // blog.save().then((result) => {
-    //   response.status(201).json(result);
-    // });
-
-    const savedBlog = await blog.save();
-    response.status(201).json(savedBlog);
-  } else {
-    response.status(400).json({
-      message: 'Missing title, cannot add blog',
-    });
+  if (!title || typeof title !== 'string') {
+    return response.status(400).json({ error: 'Missing or invalid title' });
   }
+
+  const blog = new Blog({
+    title,
+    author,
+    url,
+    genres: genres || [],
+    user: request.user._id,
+  });
+
+  const savedBlog = await blog.save();
+  response.status(201).json(savedBlog);
 });
 
+// Get single blog by ID
 blogsRouter.get('/:id', async (request, response) => {
-  const blog = await Blog.findById(request.params.id);
+  const blog = await Blog.findById(request.params.id)
+    .populate('user', { username: 1, name: 1 })
+    .populate('likedBy', { username: 1, name: 1 });
+
   if (blog) {
-    response.json({
-      message: 'successfully retrieved blog',
-      data: blog,
-    });
+    response.json({ message: 'Successfully retrieved blog', data: blog });
   } else {
-    response.status(404).json({
-      message: 'no blog found to retrieve',
-    });
+    response.status(404).json({ error: 'No blog found to retrieve' });
   }
 });
 
+// Delete blog (only if owner)
 blogsRouter.delete('/:id', async (request, response) => {
   const blog = await Blog.findById(request.params.id);
-  // console.log(request.user);
-  if (blog) {
-    if (blog.user.toString() === request.user.id.toString()) {
-      await Blog.findByIdAndDelete(request.params.id);
-      response.status(204).end();
-    } else {
-      response.status(401).json({
-        error: 'cannot delete blog, unauthorized user',
-      });
-    }
-  } else {
-    response.status(404).json({
-      error: 'no blog found to delete',
-    });
+
+  if (!blog) {
+    return response.status(404).json({ error: 'No blog found to delete' });
   }
+
+  if (blog.user.toString() !== request.user.id.toString()) {
+    return response
+      .status(401)
+      .json({ error: 'Unauthorized to delete this blog' });
+  }
+
+  await Blog.findByIdAndDelete(request.params.id);
+  response.status(204).end();
 });
 
+// Update blog (partial)
 blogsRouter.patch('/:id', async (request, response) => {
-  let result = await Blog.findByIdAndUpdate(request.params.id, request.body, {
-    new: true,
-  });
-  response.status(200).json(result).end();
+  const updatedFields = request.body;
+
+  const result = await Blog.findByIdAndUpdate(
+    request.params.id,
+    updatedFields,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  response.status(200).json(result);
 });
 
+// Update blog (full)
 blogsRouter.put('/:id', async (request, response) => {
-  // console.log(request.params);
-  let result = await Blog.findByIdAndUpdate(request.params.id, request.body, {
-    new: true,
-  });
-  response.status(200).json(result).end();
+  const updatedFields = request.body;
+
+  const result = await Blog.findByIdAndUpdate(
+    request.params.id,
+    updatedFields,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  response.status(200).json(result);
 });
+
 module.exports = blogsRouter;
