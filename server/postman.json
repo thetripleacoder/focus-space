@@ -1,0 +1,153 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Focus Space API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001/api"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "post": {
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "name": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created"
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "summary": "Login and receive token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token returned"
+          }
+        }
+      }
+    },
+    "/blogs": {
+      "get": {
+        "summary": "Get all blogs",
+        "responses": {
+          "200": {
+            "description": "List of blogs"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new blog",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "author": { "type": "string" },
+                  "url": { "type": "string" },
+                  "genres": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                },
+                "required": ["title", "url"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Blog created"
+          }
+        }
+      }
+    },
+    "/blogs/{id}/like": {
+      "put": {
+        "summary": "Like a blog",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blog liked"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
