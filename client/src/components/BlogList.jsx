@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,6 +6,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import Blog from './Blog';
 
 const BlogList = ({ blogs }) => {
   return (
@@ -21,7 +21,7 @@ const BlogList = ({ blogs }) => {
             {blogs.map((blog) => (
               <TableRow key={blog.id}>
                 <TableCell>
-                  <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+                  <Blog key={blog.id} selectedBlog={blog} />
                 </TableCell>
               </TableRow>
             ))}

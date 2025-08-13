@@ -47,8 +47,8 @@ const update = async (id, newObject) => {
   // Remove the populated object field (e.g., "user") from the update data
   delete newObject.user;
 
-  // console.log('update', newObject);
-  const request = axios.put(`${baseUrl}/${id}`, newObject, config);
+  console.log('update', newObject);
+  const request = axios.patch(`${baseUrl}/${id}`, newObject, config);
   return request.then((response) => response.data);
 };
 

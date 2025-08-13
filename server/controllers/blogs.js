@@ -18,13 +18,14 @@ blogsRouter.post('/', async (request, response) => {
   if (!title || typeof title !== 'string') {
     return response.status(400).json({ error: 'Missing or invalid title' });
   }
+  console.log('blogsRouter post', request.user);
 
   const blog = new Blog({
     title,
     author,
     url,
     genres: genres || [],
-    user: request.user._id,
+    user: request.user.id,
   });
 
   const savedBlog = await blog.save();
@@ -74,6 +75,8 @@ blogsRouter.patch('/:id', async (request, response) => {
       runValidators: true,
     }
   );
+
+  console.log('blogsRouter patch', request.body, result);
 
   response.status(200).json(result);
 });

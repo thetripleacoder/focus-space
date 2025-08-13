@@ -4,7 +4,7 @@ import { showNotification } from '../reducers/notificationReducer';
 import PropTypes from 'prop-types';
 import { useField } from '../hooks';
 import { Button, TextField } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Blog = ({ selectedBlog }) => {
   const dispatch = useDispatch();
@@ -16,6 +16,7 @@ const Blog = ({ selectedBlog }) => {
     return <div className='text-center text-gray-500'>Loading...</div>;
 
   const handleLikeBlog = (blog) => {
+    console.log(blog);
     dispatch(likeBlog(blog));
     dispatch(
       showNotification(
@@ -29,42 +30,20 @@ const Blog = ({ selectedBlog }) => {
   };
 
   const handleAddCommentBlog = (blog) => {
-    const cleanedComments =
-      blog.comments?.filter(
-        (comment) =>
-          comment?.text?.trim() !== '' &&
-          comment?.text !== undefined &&
-          comment?.text !== null
-      ) || [];
-
     const newComment = comment?.inputProps?.value?.trim();
-    if (!newComment) return;
+    if (!newComment || !user.id) return;
 
-    const updatedBlog = {
-      ...blog,
-      comments: [
-        ...(Array.isArray(blog.comments) ? cleanedComments : []),
+    dispatch(addCommentBlog(blog, newComment, user));
+    comment.reset();
+    dispatch(
+      showNotification(
         {
-          text: newComment,
-          author: user.name,
-          date: new Date().toISOString(),
+          type: 'success',
+          content: `You added a comment to: ${blog.title}`,
         },
-      ],
-    };
-
-    if (user.id) {
-      dispatch(addCommentBlog(updatedBlog));
-      comment.reset();
-      dispatch(
-        showNotification(
-          {
-            type: 'success',
-            content: `You added a comment to: ${blog.title}`,
-          },
-          5
-        )
-      );
-    }
+        5
+      )
+    );
   };
 
   const handleRemoveBlog = () => {
@@ -92,7 +71,7 @@ const Blog = ({ selectedBlog }) => {
   return (
     <div className='p-4 border border-gray-300 rounded-md mb-4 shadow-sm bg-white blog'>
       <p className='text-xl font-semibold text-gray-800 blogTitle'>
-        {selectedBlog.title}
+        <Link to={`/blogs/${selectedBlog.id}`}>{selectedBlog.title}</Link>
       </p>
       <p className='text-sm text-gray-600 mb-2 blogAuthor'>
         Added by {selectedBlog.author}

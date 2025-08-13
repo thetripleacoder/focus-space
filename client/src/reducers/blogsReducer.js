@@ -81,20 +81,46 @@ export const createBlog = (blog) => async (dispatch) => {
 };
 
 export const likeBlog = (blog) => async (dispatch) => {
-  const updatedBlog = { ...blog, likes: blog.likes + 1 };
+  const updatedBlog = {
+    ...blog,
+    likes: (blog.likes || 0) + 1,
+  };
+
+  delete updatedBlog.user;
+
   const result = await blogService.update(blog.id, updatedBlog);
-  // console.log('likeBlog', result);
   if (result) {
-    dispatch(updateBlog(updatedBlog));
+    dispatch(updateBlog(result));
     dispatch(initializeBlogs());
   }
 };
 
-export const addCommentBlog = (blog) => async (dispatch) => {
-  const result = await blogService.update(blog.id, blog);
-  // console.log('likeBlog', result);
+export const addCommentBlog = (blog, newComment, user) => async (dispatch) => {
+  if (!newComment?.trim()) return;
+
+  const cleanedComments =
+    blog.comments?.filter(
+      (comment) =>
+        comment?.text?.trim() !== '' &&
+        comment?.text !== undefined &&
+        comment?.text !== null
+    ) || [];
+
+  const updatedBlog = {
+    ...blog,
+    comments: [
+      ...(Array.isArray(blog.comments) ? cleanedComments : []),
+      {
+        text: newComment.trim(),
+        author: user.name,
+        date: new Date().toISOString(),
+      },
+    ],
+  };
+
+  const result = await blogService.update(blog.id, updatedBlog);
   if (result) {
-    dispatch(updateBlog(blog));
+    dispatch(updateBlog(result));
     dispatch(initializeBlogs());
   }
 };

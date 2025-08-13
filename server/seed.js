@@ -1,12 +1,13 @@
 require('dotenv').config();
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('./models/user');
 const Blog = require('./models/blog');
 
 const MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://localhost/dev-blog-app';
+const JWT_SECRET = process.env.SECRET;
 
 const seed = async () => {
   try {
@@ -20,89 +21,116 @@ const seed = async () => {
     const passwordHash = await bcrypt.hash('devpass', 10);
 
     console.log('👥 Seeding users...');
-    const insertedUsers = await User.insertMany([
+    const seedUsers = [
       { username: 'aldous', name: 'Aldous Dev', passwordHash },
       { username: 'luna', name: 'Luna Tester', passwordHash },
-    ]);
+    ];
+    const insertedUsers = await User.insertMany(seedUsers);
     console.log(
       '✅ Users inserted:',
       insertedUsers.map((u) => u.username)
     );
 
-    const [aldous, luna] = insertedUsers;
+    const aldous = await User.findOne({ username: 'aldous' });
+    const luna = await User.findOne({ username: 'luna' });
 
     console.log('📝 Seeding blogs...');
-    const insertedBlogs = await Blog.insertMany([
+    const seedBlogs = [
       {
         title: 'GraphQL vs REST',
-        author: 'Aldous Dev',
+        author: aldous.name,
         url: 'https://dev.example.com/graphql-vs-rest',
         genres: ['tech', 'api'],
         user: aldous._id,
       },
       {
         title: 'Framer Motion Magic',
-        author: 'Luna Tester',
+        author: luna.name,
         url: 'https://dev.example.com/framer-motion',
         genres: ['design', 'animation'],
         user: luna._id,
       },
       {
         title: 'Tailwind Tips',
-        author: 'Aldous Dev',
+        author: aldous.name,
         url: 'https://dev.example.com/tailwind-tips',
         genres: ['css', 'frontend'],
         user: aldous._id,
       },
-    ]);
+    ];
+    const insertedBlogs = await Blog.insertMany(seedBlogs);
     console.log(
       '✅ Blogs inserted:',
       insertedBlogs.map((b) => b.title)
     );
 
-    const [graphql, framer, tailwind] = insertedBlogs;
+    const graphql = await Blog.findOne({ title: 'GraphQL vs REST' });
+    const framer = await Blog.findOne({ title: 'Framer Motion Magic' });
+    const tailwind = await Blog.findOne({ title: 'Tailwind Tips' });
 
-    console.log('🔁 Linking likes...');
-    const aldousDoc = await User.findById(aldous._id);
-    const lunaDoc = await User.findById(luna._id);
+    console.log('🔁 Linking likes and comments...');
+    aldous.likedPosts = [framer._id];
+    luna.likedPosts = [graphql._id, tailwind._id];
 
-    const graphqlDoc = await Blog.findById(graphql._id);
-    const framerDoc = await Blog.findById(framer._id);
-    const tailwindDoc = await Blog.findById(tailwind._id);
+    framer.likedBy = [aldous._id];
+    graphql.likedBy = [luna._id];
+    tailwind.likedBy = [luna._id];
 
-    // Bidirectional likes
-    aldousDoc.likedPosts.push(framerDoc._id); // Aldous likes Luna's blog
-    lunaDoc.likedPosts.push(graphqlDoc._id, tailwindDoc._id); // Luna likes Aldous's blogs
+    framer.likes = 1;
+    graphql.likes = 1;
+    tailwind.likes = 1;
 
-    framerDoc.likedBy.push(aldousDoc._id);
-    graphqlDoc.likedBy.push(lunaDoc._id);
-    tailwindDoc.likedBy.push(lunaDoc._id);
-
-    framerDoc.likes = 1;
-    graphqlDoc.likes = 1;
-    tailwindDoc.likes = 1;
+    graphql.comments = [{ text: 'Great comparison!', author: luna._id }];
+    tailwind.comments = [{ text: 'Super helpful tips!', author: luna._id }];
 
     await Promise.all([
-      aldousDoc.save(),
-      lunaDoc.save(),
-      graphqlDoc.save(),
-      framerDoc.save(),
-      tailwindDoc.save(),
+      aldous.save(),
+      luna.save(),
+      graphql.save(),
+      framer.save(),
+      tailwind.save(),
     ]);
 
-    console.log('✅ Seeded users, blogs, and likes');
+    console.log('✅ Seeded users, blogs, likes, and comments');
+
+    // 🔐 Generate fresh JWT tokens
+    // 🔐 Generate fresh JWT tokens (same logic as login)
+    const aldousToken = jwt.sign(
+      { username: aldous.username, id: aldous._id },
+      JWT_SECRET
+    );
+
+    const lunaToken = jwt.sign(
+      { username: luna.username, id: luna._id },
+      JWT_SECRET
+    );
+
+    console.log('\n🔑 Dev tokens (no expiration):');
+    console.log(`Aldous: Bearer ${aldousToken}`);
+    console.log(`Luna:   Bearer ${lunaToken}\n`);
 
     // Final verification
-    const users = await User.find({});
-    const blogs = await Blog.find({});
-    console.log(
-      '📦 Final users:',
-      users.map((u) => u.username)
-    );
-    console.log(
-      '📦 Final blogs:',
-      blogs.map((b) => b.title)
-    );
+    const users = await User.find({}).populate('likedPosts').lean();
+    const blogs = await Blog.find({})
+      .populate('likedBy')
+      .populate('user')
+      .lean();
+
+    console.log('📦 Final users and their liked posts:');
+    users.forEach((u) => {
+      console.log(
+        `- ${u.username} likes: ${u.likedPosts.map((b) => b.title).join(', ')}`
+      );
+    });
+
+    console.log('📦 Final blogs and their likedBy users:');
+    blogs.forEach((b) => {
+      console.log(
+        `- ${b.title} by ${b.user.username} liked by: ${b.likedBy
+          .map((u) => u.username)
+          .join(', ')}`
+      );
+    });
   } catch (err) {
     console.error('🚨 Seeding error:', err);
     process.exit(1);
