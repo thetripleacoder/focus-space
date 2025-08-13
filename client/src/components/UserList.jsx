@@ -13,41 +13,30 @@ import PropTypes from 'prop-types';
 
 const UserList = ({ users }) => {
   return (
-    <div className='mt-4'>
-      <Typography variant='h3' component='h3'>
-        Users
-      </Typography>
-      {/* <table>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Blogs Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>
-                <Link to={`/users/${user.id}`}>{user.name}</Link>
-              </td>
-              <td>{user.blogs.length || 0}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table> */}
-      <TableContainer component={Paper}>
+    <div className='mt-4 px-4'>
+      <h1 className='text-2xl font-bold text-gray-900 mb-4'>Users</h1>
+      <TableContainer component={Paper} className='rounded-xl shadow-sm'>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>User</TableCell>
-              <TableCell>Blogs Created </TableCell>
+              <TableCell className='font-semibold text-gray-700'>
+                User
+              </TableCell>
+              <TableCell className='font-semibold text-gray-700'>
+                Blogs Created
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>
-                  <Link to={`/users/${user.id}`}>{user.name}</Link>
+                  <Link
+                    to={`/users/${user.id}`}
+                    className='text-blue-600 hover:underline'
+                  >
+                    {user.name}
+                  </Link>
                 </TableCell>
                 <TableCell>{user.blogCount || 0}</TableCell>
               </TableRow>

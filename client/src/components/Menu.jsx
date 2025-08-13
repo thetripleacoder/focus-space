@@ -23,35 +23,44 @@ const Menu = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position='static'>
-        <Toolbar>
-          <IconButton
-            edge='start'
+    <AppBar position='static' className=' shadow-sm'>
+      <Toolbar className='flex justify-between'>
+        <div className='flex gap-4'>
+          <Button
             color='inherit'
-            aria-label='menu'
-          ></IconButton>
-          {loggedUser ? (
-            <>
-              <Button color='inherit' component={Link} to='/'>
-                Blogs
-              </Button>
-              <Button color='inherit' component={Link} to='/users'>
-                Users
-              </Button>
-              <Button color='inherit'></Button>
-              <Box sx={{ flexGrow: 1 }} />
-              <p>{loggedUser.name} Logged In</p>
-              <Button color='inherit' onClick={handleLogout}>
-                Logout
-              </Button>
-            </>
-          ) : (
-            <Link to='/login'>Login</Link>
-          )}
-        </Toolbar>
-      </AppBar>
-    </Box>
+            component={Link}
+            to='/'
+            className='text-gray-800 font-medium'
+          >
+            Blogs
+          </Button>
+          <Button
+            color='inherit'
+            component={Link}
+            to='/users'
+            className='text-gray-800 font-medium'
+          >
+            Users
+          </Button>
+        </div>
+        {loggedUser ? (
+          <div className='flex items-center gap-4'>
+            <p className='text-sm text-gray-600'>{loggedUser.name} Logged In</p>
+            <Button
+              color='inherit'
+              onClick={handleLogout}
+              className='text-red-500 font-medium'
+            >
+              Logout
+            </Button>
+          </div>
+        ) : (
+          <Link to='/login' className='text-blue-600 font-medium'>
+            Login
+          </Link>
+        )}
+      </Toolbar>
+    </AppBar>
   );
 };
 

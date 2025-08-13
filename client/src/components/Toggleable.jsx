@@ -19,19 +19,19 @@ const Toggleable = forwardRef((props, refs) => {
   });
 
   return (
-    <div className='flex items-center justify-center flex-col gap-4 m-4 '>
-      <div style={hideWhenVisible} className=' flex flex-col gap-4'>
+    <div className='flex items-center justify-center flex-col gap-4 m-4'>
+      <div style={hideWhenVisible} className='flex flex-col gap-4'>
         <Button variant='contained' onClick={toggleVisibility}>
           {props.buttonLabel}
         </Button>
       </div>
       <div
         style={showWhenVisible}
-        className='togglableContent flex items-center justify-center flex-col'
+        className='togglableContent flex flex-col items-center gap-4'
       >
         {props.children}
         <Button variant='contained' onClick={toggleVisibility}>
-          cancel
+          Cancel
         </Button>
       </div>
     </div>

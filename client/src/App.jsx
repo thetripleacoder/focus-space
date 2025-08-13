@@ -35,9 +35,8 @@ const App = () => {
   }, [loggedUser, dispatch]);
 
   return (
-    <Container>
+    <div className='w-full'>
       <Menu />
-
       <Notification />
 
       <Routes>
@@ -49,11 +48,11 @@ const App = () => {
             <Route path='/blogs/:id' element={<BlogDetails />} />
             <Route path='/users/:id' element={<UserBlogs />} />
             <Route path='/users' element={<Users />} />
-            {/* <Route path='/create' element={<CreateBlog />} /> */}
+            {/* <Route path="/create" element={<CreateBlog />} /> */}
           </>
         )}
       </Routes>
-    </Container>
+    </div>
   );
 };
 

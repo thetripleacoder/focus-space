@@ -51,31 +51,25 @@ const LoginForm = () => {
   };
 
   return (
-    <div className='flex items-center justify-center flex-col gap-4 mt-10'>
-      <form onSubmit={handleSubmit}>
-        <div className='flex flex-col gap-2'>
-          <div className='flex items-baseline gap-2'>
-            <span>Username:</span>
-
-            <TextField
-              variant='standard'
-              data-testid='title'
-              {...username.inputProps}
-            />
+    <div className='flex items-center justify-center flex-col gap-6 mt-10'>
+      <form onSubmit={handleSubmit} className='w-full max-w-sm space-y-4'>
+        {[
+          { label: 'Username', inputProps: username.inputProps },
+          { label: 'Password', inputProps: password.inputProps },
+        ].map(({ label, inputProps }, i) => (
+          <div key={i} className='flex items-center gap-2'>
+            <span className='text-sm text-gray-700 w-24'>{label}:</span>
+            <TextField variant='standard' {...inputProps} className='flex-1' />
           </div>
-          <div className='flex items-baseline gap-2'>
-            <span>Password:</span>
-            <TextField
-              variant='standard'
-              data-testid='author'
-              {...password.inputProps}
-            />
-          </div>
-          <div className='mt-4 items-center justify-center flex'>
-            <Button variant='outlined' type='submit'>
-              Login
-            </Button>
-          </div>
+        ))}
+        <div className='flex justify-center mt-4'>
+          <Button
+            variant='outlined'
+            type='submit'
+            className='!rounded-full px-6 py-1'
+          >
+            Login
+          </Button>
         </div>
       </form>
     </div>

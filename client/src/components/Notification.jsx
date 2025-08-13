@@ -12,7 +12,7 @@ const Notification = () => {
     notification && (
       <Alert
         severity={notification.type === 'success' ? 'success' : 'error'}
-        style={style}
+        className='rounded-md shadow-sm'
       >
         {notification.content}
       </Alert>

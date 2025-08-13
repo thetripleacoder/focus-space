@@ -69,26 +69,24 @@ const Blog = ({ selectedBlog }) => {
   };
 
   return (
-    <div className='p-4 border border-gray-300 rounded-md mb-4 shadow-sm bg-white blog'>
-      <p className='text-xl font-semibold text-gray-800 blogTitle'>
+    <div className='p-4 bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition'>
+      <p className='text-lg font-bold text-gray-900 hover:text-blue-600'>
         <Link to={`/blogs/${selectedBlog.id}`}>{selectedBlog.title}</Link>
       </p>
-      <p className='text-sm text-gray-600 mb-2 blogAuthor'>
-        Added by {selectedBlog.author}
-      </p>
+      <p className='text-sm text-gray-500'>Added by {selectedBlog.author}</p>
 
-      <div className='blogDetails space-y-4'>
-        <p className='text-sm text-blue-600 blogUrl'>URL: {selectedBlog.url}</p>
+      <div className='mt-4 space-y-4'>
+        <p className='text-sm text-blue-500'>URL: {selectedBlog.url}</p>
 
         <div className='flex items-center gap-2'>
-          <span className='text-sm text-gray-700'>Likes:</span>
-          <span className='font-medium text-blue-600 blogLikes'>
+          <span className='text-sm text-gray-600'>Likes:</span>
+          <span className='font-semibold text-blue-600'>
             {selectedBlog.likes}
           </span>
           <Button
             variant='contained'
             size='small'
-            className='!bg-blue-500 hover:!bg-blue-600 !text-white'
+            className='!bg-blue-500 hover:!bg-blue-600 !text-white !rounded-full px-4 py-1 text-sm'
             onClick={() => handleLikeBlog(selectedBlog)}
             data-testid='like-button'
           >
@@ -100,7 +98,7 @@ const Blog = ({ selectedBlog }) => {
           <Button
             variant='contained'
             size='small'
-            className='!bg-red-500 hover:!bg-red-600 !text-white'
+            className='!bg-red-500 hover:!bg-red-600 !text-white !rounded-full px-4 py-1 text-sm'
             onClick={handleRemoveBlog}
             data-testid='remove-button'
           >
@@ -112,13 +110,13 @@ const Blog = ({ selectedBlog }) => {
           <TextField
             placeholder='Add comment'
             size='small'
-            className='!w-full'
+            className='!w-full !bg-white'
             {...comment.inputProps}
           />
           <Button
             variant='contained'
             size='small'
-            className='!bg-green-500 hover:!bg-green-600 !text-white'
+            className='!bg-green-500 hover:!bg-green-600 !text-white !rounded-full px-4 py-1 text-sm'
             onClick={() => handleAddCommentBlog(selectedBlog)}
             data-testid='add-comment-button'
           >
@@ -127,7 +125,7 @@ const Blog = ({ selectedBlog }) => {
         </div>
 
         <div className='mt-4'>
-          <h3 className='text-lg font-semibold text-gray-800 mb-2'>
+          <h3 className='text-base font-semibold text-gray-800 mb-2'>
             Comments:
           </h3>
           {selectedBlog.comments?.length > 0 ? (
@@ -136,14 +134,14 @@ const Blog = ({ selectedBlog }) => {
                 <li key={index} className='text-sm text-gray-700'>
                   <strong className='text-blue-600'>{comment.author}</strong>:{' '}
                   {comment.text}
-                  <span className='ml-2 text-xs text-gray-500'>
+                  <span className='ml-2 text-xs text-gray-400'>
                     ({new Date(comment.date).toLocaleString()})
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className='text-sm text-gray-500'>No comments yet.</p>
+            <p className='text-sm text-gray-400'>No comments yet.</p>
           )}
         </div>
       </div>

@@ -40,67 +40,42 @@ const BlogForm = ({ toggleRef }) => {
   };
 
   return (
-    <div className='w-100 mx-auto p-6 bg-white rounded-md '>
-      <h2 className='text-xl font-semibold text-gray-800 mb-4 text-center'>
-        Create a New Blog
-      </h2>
+    <div className='max-w-2xl mx-auto mt-6 bg-white rounded-2xl shadow-lg border border-gray-200'>
+      <div className='px-6 py-4 border-b border-gray-100'>
+        <h2 className='text-lg font-semibold text-gray-800 text-center'>
+          What's on your mind, blogger?
+        </h2>
+      </div>
 
-      <form onSubmit={addBlog} className='space-y-4'>
-        <div className='flex flex-col gap-1'>
-          <label htmlFor='title' className='text-sm text-gray-700'>
-            Title
-          </label>
-          <TextField
-            id='title'
-            variant='outlined'
-            size='small'
-            data-testid='title'
-            name='title'
-            value={newBlogFormData.title}
-            onChange={handleChange}
-            className='!bg-white'
-          />
-        </div>
+      <form onSubmit={addBlog} className='px-6 py-4 space-y-5'>
+        {['title', 'author', 'url'].map((field) => (
+          <div key={field}>
+            <TextField
+              id={field}
+              name={field}
+              variant='outlined'
+              size='medium'
+              placeholder={`Enter ${field}`}
+              value={newBlogFormData[field]}
+              onChange={handleChange}
+              fullWidth
+              InputProps={{
+                style: {
+                  borderRadius: '999px',
+                  backgroundColor: '#f9fafb',
+                },
+              }}
+            />
+          </div>
+        ))}
 
-        <div className='flex flex-col gap-1'>
-          <label htmlFor='author' className='text-sm text-gray-700'>
-            Author
-          </label>
-          <TextField
-            id='author'
-            variant='outlined'
-            size='small'
-            data-testid='author'
-            name='author'
-            value={newBlogFormData.author}
-            onChange={handleChange}
-            className='!bg-white'
-          />
-        </div>
-
-        <div className='flex flex-col gap-1'>
-          <label htmlFor='url' className='text-sm text-gray-700'>
-            URL
-          </label>
-          <TextField
-            id='url'
-            variant='outlined'
-            size='small'
-            data-testid='url'
-            name='url'
-            value={newBlogFormData.url}
-            onChange={handleChange}
-            className='!bg-white'
-          />
-        </div>
-
-        <div className='flex justify-center pt-2'>
+        <div className='flex justify-end pt-2'>
           <Button
             variant='contained'
             type='submit'
-            className='!bg-blue-500 hover:!bg-blue-600 !text-white'
+            className='!bg-blue-500 hover:!bg-blue-600 !text-white !rounded-full px-6 py-2 shadow-md'
           >
-            Create
+            Post Blog
           </Button>
         </div>
       </form>

@@ -10,17 +10,14 @@ import Blog from './Blog';
 
 const BlogList = ({ blogs }) => {
   return (
-    <div>
-      <Typography variant='h3' component='h3'>
-        Blogs
-      </Typography>
-
-      <TableContainer component={Paper}>
+    <div className='px-4 py-6'>
+      <h1 className='text-2xl font-bold text-gray-900 mb-4'>Blogs</h1>
+      <TableContainer component={Paper} className='rounded-xl shadow-sm'>
         <Table>
           <TableBody>
             {blogs.map((blog) => (
               <TableRow key={blog.id}>
-                <TableCell>
+                <TableCell className='p-4'>
                   <Blog key={blog.id} selectedBlog={blog} />
                 </TableCell>
               </TableRow>
