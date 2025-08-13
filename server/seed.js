@@ -34,62 +34,62 @@ const seed = async () => {
     const aldous = await User.findOne({ username: 'aldous' });
     const luna = await User.findOne({ username: 'luna' });
 
-    console.log('📝 Seeding blogs...');
-    const seedBlogs = [
-      {
-        title: 'GraphQL vs REST',
-        author: aldous.name,
-        url: 'https://dev.example.com/graphql-vs-rest',
-        genres: ['tech', 'api'],
-        user: aldous._id,
-      },
-      {
-        title: 'Framer Motion Magic',
-        author: luna.name,
-        url: 'https://dev.example.com/framer-motion',
-        genres: ['design', 'animation'],
-        user: luna._id,
-      },
-      {
-        title: 'Tailwind Tips',
-        author: aldous.name,
-        url: 'https://dev.example.com/tailwind-tips',
-        genres: ['css', 'frontend'],
-        user: aldous._id,
-      },
-    ];
-    const insertedBlogs = await Blog.insertMany(seedBlogs);
-    console.log(
-      '✅ Blogs inserted:',
-      insertedBlogs.map((b) => b.title)
-    );
+    // console.log('📝 Seeding blogs...');
+    // const seedBlogs = [
+    //   {
+    //     title: 'GraphQL vs REST',
+    //     author: aldous.name,
+    //     url: 'https://dev.example.com/graphql-vs-rest',
+    //     genres: ['tech', 'api'],
+    //     user: aldous._id,
+    //   },
+    //   {
+    //     title: 'Framer Motion Magic',
+    //     author: luna.name,
+    //     url: 'https://dev.example.com/framer-motion',
+    //     genres: ['design', 'animation'],
+    //     user: luna._id,
+    //   },
+    //   {
+    //     title: 'Tailwind Tips',
+    //     author: aldous.name,
+    //     url: 'https://dev.example.com/tailwind-tips',
+    //     genres: ['css', 'frontend'],
+    //     user: aldous._id,
+    //   },
+    // ];
+    // const insertedBlogs = await Blog.insertMany(seedBlogs);
+    // console.log(
+    //   '✅ Blogs inserted:',
+    //   insertedBlogs.map((b) => b.title)
+    // );
 
-    const graphql = await Blog.findOne({ title: 'GraphQL vs REST' });
-    const framer = await Blog.findOne({ title: 'Framer Motion Magic' });
-    const tailwind = await Blog.findOne({ title: 'Tailwind Tips' });
+    // const graphql = await Blog.findOne({ title: 'GraphQL vs REST' });
+    // const framer = await Blog.findOne({ title: 'Framer Motion Magic' });
+    // const tailwind = await Blog.findOne({ title: 'Tailwind Tips' });
 
-    console.log('🔁 Linking likes and comments...');
-    aldous.likedPosts = [framer._id];
-    luna.likedPosts = [graphql._id, tailwind._id];
+    // console.log('🔁 Linking likes and comments...');
+    // aldous.likedPosts = [framer._id];
+    // luna.likedPosts = [graphql._id, tailwind._id];
 
-    framer.likedBy = [aldous._id];
-    graphql.likedBy = [luna._id];
-    tailwind.likedBy = [luna._id];
+    // framer.likedBy = [aldous._id];
+    // graphql.likedBy = [luna._id];
+    // tailwind.likedBy = [luna._id];
 
-    framer.likes = 1;
-    graphql.likes = 1;
-    tailwind.likes = 1;
+    // framer.likes = 1;
+    // graphql.likes = 1;
+    // tailwind.likes = 1;
 
-    graphql.comments = [{ text: 'Great comparison!', author: luna._id }];
-    tailwind.comments = [{ text: 'Super helpful tips!', author: luna._id }];
+    // graphql.comments = [{ text: 'Great comparison!', author: luna._id }];
+    // tailwind.comments = [{ text: 'Super helpful tips!', author: luna._id }];
 
-    await Promise.all([
-      aldous.save(),
-      luna.save(),
-      graphql.save(),
-      framer.save(),
-      tailwind.save(),
-    ]);
+    // await Promise.all([
+    //   aldous.save(),
+    //   luna.save(),
+    //   graphql.save(),
+    //   framer.save(),
+    //   tailwind.save(),
+    // ]);
 
     console.log('✅ Seeded users, blogs, likes, and comments');
 
