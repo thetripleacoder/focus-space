@@ -85,8 +85,6 @@
                 "type": "object",
                 "properties": {
                   "title": { "type": "string" },
-                  "author": { "type": "string" },
-                  "url": { "type": "string" },
                   "genres": {
                     "type": "array",
                     "items": { "type": "string" }

@@ -1,5 +1,6 @@
 const Blog = require('../models/blog');
 const blogsRouter = require('express').Router();
+const middleware = require('../utils/middleware'); // ✅ Import shared middleware
 require('express-async-errors');
 
 // Get all blogs with user and likedBy populated
@@ -12,25 +13,26 @@ blogsRouter.get('/', async (request, response) => {
 });
 
 // Create new blog
-blogsRouter.post('/', async (request, response) => {
-  const { title, author, url, genres } = request.body;
+blogsRouter.post(
+  '/',
+  middleware.sanitizeAndValidateBlog,
+  async (request, response) => {
+    const { sanitizedBody } = request;
 
-  if (!title || typeof title !== 'string') {
-    return response.status(400).json({ error: 'Missing or invalid title' });
+    if (!sanitizedBody.title || typeof sanitizedBody.title !== 'string') {
+      return response.status(400).json({ error: 'Missing or invalid title' });
+    }
+
+    const blog = new Blog({
+      ...sanitizedBody,
+      genres: Array.isArray(sanitizedBody.genres) ? sanitizedBody.genres : [],
+      user: request.user.id,
+    });
+
+    const savedBlog = await blog.save();
+    response.status(201).json(savedBlog);
   }
-  console.log('blogsRouter post', request.user);
-
-  const blog = new Blog({
-    title,
-    author,
-    url,
-    genres: genres || [],
-    user: request.user.id,
-  });
-
-  const savedBlog = await blog.save();
-  response.status(201).json(savedBlog);
-});
+);
 
 // Get single blog by ID
 blogsRouter.get('/:id', async (request, response) => {
@@ -64,37 +66,48 @@ blogsRouter.delete('/:id', async (request, response) => {
 });
 
 // Update blog (partial)
-blogsRouter.patch('/:id', async (request, response) => {
-  const updatedFields = request.body;
+blogsRouter.patch(
+  '/:id',
+  middleware.sanitizeAndValidateBlog,
+  async (request, response) => {
+    const result = await Blog.findByIdAndUpdate(
+      request.params.id,
+      request.sanitizedBody,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
-  const result = await Blog.findByIdAndUpdate(
-    request.params.id,
-    updatedFields,
-    {
-      new: true,
-      runValidators: true,
+    if (!result) {
+      return response.status(404).json({ error: 'No blog found to update' });
     }
-  );
 
-  console.log('blogsRouter patch', request.body, result);
-
-  response.status(200).json(result);
-});
+    response.status(200).json(result);
+  }
+);
 
 // Update blog (full)
-blogsRouter.put('/:id', async (request, response) => {
-  const updatedFields = request.body;
+blogsRouter.put(
+  '/:id',
+  middleware.sanitizeAndValidateBlog,
+  async (request, response) => {
+    const result = await Blog.findByIdAndUpdate(
+      request.params.id,
+      request.sanitizedBody,
+      {
+        new: true,
+        runValidators: true,
+        overwrite: true,
+      }
+    );
 
-  const result = await Blog.findByIdAndUpdate(
-    request.params.id,
-    updatedFields,
-    {
-      new: true,
-      runValidators: true,
+    if (!result) {
+      return response.status(404).json({ error: 'No blog found to update' });
     }
-  );
 
-  response.status(200).json(result);
-});
+    response.status(200).json(result);
+  }
+);
 
 module.exports = blogsRouter;

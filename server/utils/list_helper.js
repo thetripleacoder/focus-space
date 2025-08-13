@@ -20,7 +20,6 @@ const favoriteBlog = (blogs) => {
   });
   let result = {
     title: faveBlog.title,
-    author: faveBlog.author,
     likes: faveBlog.likes,
   };
   return result;
@@ -30,10 +29,9 @@ const mostBlogs = (blogs) => {
   let result = blogs.reduce(
     (accumulator, currentValue) => {
       let numOfMatches = blogs.filter(
-        (blog) => blog.author === currentValue.author
+        (blog) => blog.user._id === currentValue.user._id
       ).length;
       let currentData = {
-        author: currentValue.author,
         blogs: numOfMatches,
       };
 
@@ -44,7 +42,6 @@ const mostBlogs = (blogs) => {
       }
     },
     {
-      author: null,
       blogs: 0,
     }
   );

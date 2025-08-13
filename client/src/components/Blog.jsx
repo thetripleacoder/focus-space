@@ -53,7 +53,7 @@ const Blog = ({ selectedBlog }) => {
       )
     ) {
       dispatch(deleteBlog(selectedBlog.id));
-      navigate(-1);
+      navigate('/');
       dispatch(
         showNotification(
           {

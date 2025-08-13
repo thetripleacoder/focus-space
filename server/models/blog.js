@@ -1,24 +1,27 @@
 const mongoose = require('mongoose');
 
-const blogSchema = new mongoose.Schema({
-  title: String,
-  author: String,
-  url: String,
-  likes: { type: Number, default: 0 },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
-  genres: [String],
-  comments: [{ text: String, author: String, date: Date }],
-  likedBy: [
-    {
+const blogSchema = new mongoose.Schema(
+  {
+    title: String,
+    likes: { type: Number, default: 0 },
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-  ],
-  createdAt: { type: Date, default: Date.now },
-});
+    genres: [String],
+    comments: [{ text: String, author: String, date: Date }],
+    likedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    createdAt: { type: Date, default: Date.now },
+  },
+  {
+    strict: true, // ✅ Enforces schema fields only
+  }
+);
 
 blogSchema.set('toJSON', {
   transform: (document, returnedObject) => {

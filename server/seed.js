@@ -38,22 +38,16 @@ const seed = async () => {
     // const seedBlogs = [
     //   {
     //     title: 'GraphQL vs REST',
-    //     author: aldous.name,
-    //     url: 'https://dev.example.com/graphql-vs-rest',
     //     genres: ['tech', 'api'],
     //     user: aldous._id,
     //   },
     //   {
     //     title: 'Framer Motion Magic',
-    //     author: luna.name,
-    //     url: 'https://dev.example.com/framer-motion',
     //     genres: ['design', 'animation'],
     //     user: luna._id,
     //   },
     //   {
     //     title: 'Tailwind Tips',
-    //     author: aldous.name,
-    //     url: 'https://dev.example.com/tailwind-tips',
     //     genres: ['css', 'frontend'],
     //     user: aldous._id,
     //   },
