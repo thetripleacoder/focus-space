@@ -5,7 +5,6 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
 import Blog from './Blog';
 
 const BlogList = ({ blogs }) => {

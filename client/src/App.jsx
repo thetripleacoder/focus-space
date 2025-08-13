@@ -11,7 +11,6 @@ import { Route, Routes } from 'react-router-dom';
 import Blogs from './pages/blogs';
 import Users from './pages/users';
 import UserBlogs from './pages/userBlogs';
-import { Container } from '@mui/material';
 import BlogDetails from './pages/blogDetails';
 
 const App = () => {

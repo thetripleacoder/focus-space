@@ -36,8 +36,8 @@ const LoginForm = () => {
         )
       );
     } catch (error) {
-      // console.log('error', error);
-      // console.log(username.inputProps.value, password.inputProps.value);
+      console.log('error', error);
+      console.log(username.inputProps.value, password.inputProps.value);
       dispatch(
         showNotification(
           {

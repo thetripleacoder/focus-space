@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AppBar, Toolbar, Button, IconButton, Box } from '@mui/material';
+import { AppBar, Toolbar, Button } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../reducers/userReducer';
 import { removeFromLocalStorage } from '../services/localStorage';
