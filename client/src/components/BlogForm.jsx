@@ -1,24 +1,42 @@
 import { useState } from 'react';
-import { showNotification } from '../reducers/notificationReducer';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createBlog } from '../reducers/blogsReducer';
+import { showNotification } from '../reducers/notificationReducer';
 import { Button, TextField } from '@mui/material';
 import PropTypes from 'prop-types';
-// import { initializeUsers } from '../reducers/userReducer';
 
 const BlogForm = ({ toggleRef }) => {
-  const [newBlogFormData, setNewBlogFormData] = useState({
-    title: '',
-    author: '',
-    url: '',
-  });
+  const [title, setTitle] = useState('');
+  const [genreInput, setGenreInput] = useState('');
+  const [genres, setGenres] = useState([]);
   const dispatch = useDispatch();
+  const loggedUser = useSelector((state) => state.user.loggedUser);
 
-  const addBlog = (event) => {
-    event.preventDefault();
-    dispatch(createBlog(newBlogFormData));
-    // dispatch(initializeUsers());
-    setNewBlogFormData({ title: '', author: '', url: '' });
+  const handleAddGenre = (e) => {
+    e.preventDefault();
+    const trimmed = genreInput.trim();
+    if (trimmed && !genres.includes(trimmed)) {
+      setGenres([...genres, trimmed]);
+    }
+    setGenreInput('');
+  };
+
+  const handleRemoveGenre = (genreToRemove) => {
+    setGenres(genres.filter((g) => g !== genreToRemove));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const payload = {
+      title: title.trim(),
+      genres,
+    };
+
+    dispatch(createBlog(payload));
+    setTitle('');
+    setGenres([]);
+    setGenreInput('');
+
     if (toggleRef?.current?.toggleVisibility) {
       toggleRef.current.toggleVisibility();
     }
@@ -27,37 +45,74 @@ const BlogForm = ({ toggleRef }) => {
       showNotification(
         {
           type: 'success',
-          content: `${newBlogFormData.author} added a new blog`,
+          content: `${loggedUser.name} added a new blog`,
         },
         5
       )
     );
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewBlogFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   return (
-    <div className='max-w-2xl mx-auto mt-6 bg-white rounded-2xl shadow-lg border border-gray-200'>
+    <div className='max-w-2xl mx-auto mt-6 bg-white rounded-2xl shadow-md border border-gray-200'>
       <div className='px-6 py-4 border-b border-gray-100'>
         <h2 className='text-lg font-semibold text-gray-800 text-center'>
-          What's on your mind, blogger?
+          What&apos;s on your mind, blogger?
         </h2>
       </div>
 
-      <form onSubmit={addBlog} className='px-6 py-4 space-y-5'>
-        {['title', 'author', 'url'].map((field) => (
-          <div key={field}>
+      <form onSubmit={handleSubmit} className='px-6 py-4 space-y-6'>
+        {/* Blog Title */}
+        <TextField
+          id='title'
+          name='title'
+          variant='outlined'
+          size='medium'
+          placeholder='Write a blog title...'
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          fullWidth
+          InputProps={{
+            style: {
+              borderRadius: '999px',
+              backgroundColor: '#f9fafb',
+            },
+          }}
+        />
+
+        {/* Genre Tags */}
+        <div>
+          <label className='block text-sm font-medium text-gray-700 mb-1'>
+            Add Genres
+          </label>
+          <div className='flex gap-2 flex-wrap mb-2'>
+            {genres.map((genre) => (
+              <span
+                key={genre}
+                className='bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm flex items-center gap-2'
+              >
+                {genre}
+                <button
+                  type='button'
+                  onClick={() => handleRemoveGenre(genre)}
+                  className='text-blue-500 hover:text-blue-700'
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className='flex gap-2'>
             <TextField
-              id={field}
-              name={field}
+              id='genreInput'
+              name='genreInput'
               variant='outlined'
-              size='medium'
-              placeholder={`Enter ${field}`}
-              value={newBlogFormData[field]}
-              onChange={handleChange}
+              size='small'
+              placeholder='Type a genre and press Enter'
+              value={genreInput}
+              onChange={(e) => setGenreInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddGenre(e);
+              }}
               fullWidth
               InputProps={{
                 style: {
@@ -66,9 +121,17 @@ const BlogForm = ({ toggleRef }) => {
                 },
               }}
             />
+            <Button
+              variant='contained'
+              onClick={handleAddGenre}
+              className='!bg-blue-500 hover:!bg-blue-600 !text-white !rounded-full px-4'
+            >
+              Add
+            </Button>
           </div>
-        ))}
+        </div>
 
+        {/* Submit Button */}
         <div className='flex justify-end pt-2'>
           <Button
             variant='contained'
@@ -82,6 +145,7 @@ const BlogForm = ({ toggleRef }) => {
     </div>
   );
 };
+
 BlogForm.propTypes = {
   toggleRef: PropTypes.object,
 };

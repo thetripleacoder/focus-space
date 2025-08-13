@@ -1,6 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import blogService from '../services/blogs';
 import { initializeUsers } from './userReducer';
+import { sanitizeBlogForUpdate } from '../utils/sanitizeBlogForUpdate';
+
 const initialState = [];
 const blogSlice = createSlice({
   name: 'blogs',
@@ -81,12 +83,11 @@ export const createBlog = (blog) => async (dispatch) => {
 };
 
 export const likeBlog = (blog) => async (dispatch) => {
+  const sanitized = sanitizeBlogForUpdate(blog);
   const updatedBlog = {
-    ...blog,
+    ...sanitized,
     likes: (blog.likes || 0) + 1,
   };
-
-  delete updatedBlog.user;
 
   const result = await blogService.update(blog.id, updatedBlog);
   if (result) {
@@ -106,10 +107,12 @@ export const addCommentBlog = (blog, newComment, user) => async (dispatch) => {
         comment?.text !== null
     ) || [];
 
+  const sanitized = sanitizeBlogForUpdate(blog);
+
   const updatedBlog = {
-    ...blog,
+    ...sanitized,
     comments: [
-      ...(Array.isArray(blog.comments) ? cleanedComments : []),
+      ...cleanedComments,
       {
         text: newComment.trim(),
         author: user.name,

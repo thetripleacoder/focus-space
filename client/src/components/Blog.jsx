@@ -16,13 +16,12 @@ const Blog = ({ selectedBlog }) => {
     return <div className='text-center text-gray-500'>Loading...</div>;
 
   const handleLikeBlog = (blog) => {
-    console.log(blog);
     dispatch(likeBlog(blog));
     dispatch(
       showNotification(
         {
           type: 'success',
-          content: `You have liked blog with content: ${selectedBlog.title}`,
+          content: `You liked "${selectedBlog.title}"`,
         },
         5
       )
@@ -39,7 +38,7 @@ const Blog = ({ selectedBlog }) => {
       showNotification(
         {
           type: 'success',
-          content: `You added a comment to: ${blog.title}`,
+          content: `You commented on "${blog.title}"`,
         },
         5
       )
@@ -49,7 +48,7 @@ const Blog = ({ selectedBlog }) => {
   const handleRemoveBlog = () => {
     if (
       window.confirm(
-        `Remove blog ${selectedBlog.title} by ${selectedBlog.author}?`
+        `Remove blog "${selectedBlog.title}" by ${selectedBlog.author}?`
       )
     ) {
       dispatch(deleteBlog(selectedBlog.id));
@@ -58,35 +57,40 @@ const Blog = ({ selectedBlog }) => {
         showNotification(
           {
             type: 'success',
-            content: `You have deleted blog with content: ${selectedBlog.title}`,
+            content: `You deleted "${selectedBlog.title}"`,
           },
           5
         )
       );
     } else {
-      window.alert("Glad you're staying!");
+      window.alert("Glad you're keeping it!");
     }
   };
 
   return (
-    <div className='p-4 bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition'>
-      <p className='text-lg font-bold text-gray-900 hover:text-blue-600'>
-        <Link to={`/blogs/${selectedBlog.id}`}>{selectedBlog.title}</Link>
-      </p>
-      <p className='text-sm text-gray-500'>Added by {selectedBlog.author}</p>
+    <div className='max-w-2xl mx-auto mt-6 bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition-all'>
+      {/* Blog Header */}
+      <div className='px-6 py-4 border-b border-gray-100'>
+        <h2 className='text-xl font-bold text-gray-900 hover:text-blue-600 transition'>
+          <Link to={`/blogs/${selectedBlog.id}`}>{selectedBlog.title}</Link>
+        </h2>
+        <p className='text-sm text-gray-500'>Posted by {selectedBlog.author}</p>
+        <p className='text-xs text-blue-500 mt-1 break-words'>
+          {selectedBlog.url}
+        </p>
+      </div>
 
-      <div className='mt-4 space-y-4'>
-        <p className='text-sm text-blue-500'>URL: {selectedBlog.url}</p>
-
-        <div className='flex items-center gap-2'>
-          <span className='text-sm text-gray-600'>Likes:</span>
+      {/* Blog Actions */}
+      <div className='px-6 py-4 space-y-4'>
+        <div className='flex items-center gap-3'>
+          <span className='text-sm text-gray-600'>👍 Likes:</span>
           <span className='font-semibold text-blue-600'>
             {selectedBlog.likes}
           </span>
           <Button
             variant='contained'
             size='small'
-            className='!bg-blue-500 hover:!bg-blue-600 !text-white !rounded-full px-4 py-1 text-sm'
+            className='!bg-blue-500 hover:!bg-blue-600 !text-white !rounded-full px-4 py-1 text-sm shadow-sm'
             onClick={() => handleLikeBlog(selectedBlog)}
             data-testid='like-button'
           >
@@ -98,50 +102,63 @@ const Blog = ({ selectedBlog }) => {
           <Button
             variant='contained'
             size='small'
-            className='!bg-red-500 hover:!bg-red-600 !text-white !rounded-full px-4 py-1 text-sm'
+            className='!bg-red-500 hover:!bg-red-600 !text-white !rounded-full px-4 py-1 text-sm shadow-sm'
             onClick={handleRemoveBlog}
             data-testid='remove-button'
           >
-            Remove
+            🗑️ Remove
           </Button>
         )}
 
+        {/* Comment Input */}
         <div className='space-y-2'>
           <TextField
-            placeholder='Add comment'
+            placeholder='Write a comment...'
             size='small'
             className='!w-full !bg-white'
             {...comment.inputProps}
+            InputProps={{
+              style: {
+                borderRadius: '999px',
+                backgroundColor: '#f9fafb',
+              },
+            }}
           />
           <Button
             variant='contained'
             size='small'
-            className='!bg-green-500 hover:!bg-green-600 !text-white !rounded-full px-4 py-1 text-sm'
+            className='!bg-green-500 hover:!bg-green-600 !text-white !rounded-full px-4 py-1 text-sm shadow-sm'
             onClick={() => handleAddCommentBlog(selectedBlog)}
             data-testid='add-comment-button'
           >
-            Add Comment
+            💬 Comment
           </Button>
         </div>
 
-        <div className='mt-4'>
-          <h3 className='text-base font-semibold text-gray-800 mb-2'>
-            Comments:
+        {/* Comments Section */}
+        <div className='mt-6'>
+          <h3 className='text-base font-semibold text-gray-800 mb-3'>
+            Comments
           </h3>
           {selectedBlog.comments?.length > 0 ? (
-            <ul className='space-y-2'>
+            <ul className='space-y-3'>
               {selectedBlog.comments.map((comment, index) => (
-                <li key={index} className='text-sm text-gray-700'>
+                <li
+                  key={index}
+                  className='bg-gray-100 rounded-md px-3 py-2 text-sm text-gray-700 shadow-sm'
+                >
                   <strong className='text-blue-600'>{comment.author}</strong>:{' '}
                   {comment.text}
-                  <span className='ml-2 text-xs text-gray-400'>
+                  <span className='ml-2 text-xs text-gray-500'>
                     ({new Date(comment.date).toLocaleString()})
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className='text-sm text-gray-400'>No comments yet.</p>
+            <p className='text-sm text-gray-400 italic'>
+              No comments yet. Be the first!
+            </p>
           )}
         </div>
       </div>
