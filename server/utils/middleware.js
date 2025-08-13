@@ -100,6 +100,44 @@ const sanitizeAndValidateBlog = (req, res, next) => {
   }
 };
 
+// --- Allowed fields for User creation ---
+const allowedUserFields = ['username', 'name', 'password'];
+
+// --- Sanitize User Payload ---
+const sanitizeUserPayload = (payload = {}) => {
+  const sanitized = {};
+  for (const key of allowedUserFields) {
+    if (Object.prototype.hasOwnProperty.call(payload, key)) {
+      const value = payload[key];
+      if (value !== undefined) {
+        sanitized[key] = value;
+      }
+    }
+  }
+  return sanitized;
+};
+
+// --- Validate User Fields ---
+const validateUserFields = (body) => {
+  const invalidKeys = Object.keys(body).filter(
+    (key) => !allowedUserFields.includes(key)
+  );
+  if (invalidKeys.length > 0) {
+    throw new Error(`Invalid fields: ${invalidKeys.join(', ')}`);
+  }
+};
+
+// --- Combined Middleware ---
+const sanitizeAndValidateUser = (req, res, next) => {
+  try {
+    validateUserFields(req.body);
+    req.sanitizedBody = sanitizeUserPayload(req.body);
+    next();
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 module.exports = {
   requestLogger,
   unknownEndpoint,
@@ -107,4 +145,5 @@ module.exports = {
   tokenExtractor,
   userExtractor,
   sanitizeAndValidateBlog,
+  sanitizeAndValidateUser,
 };

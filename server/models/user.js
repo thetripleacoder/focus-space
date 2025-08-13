@@ -1,20 +1,25 @@
 const mongoose = require('mongoose');
 
-const userSchema = mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  name: String,
-  passwordHash: String,
-  likedPosts: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Blog',
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
     },
-  ],
-});
+    name: String,
+    passwordHash: String,
+    likedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Blog',
+      },
+    ],
+  },
+  {
+    strict: true, // ✅ Discards unknown fields during save/create
+  }
+);
 
 userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
