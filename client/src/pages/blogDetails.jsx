@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import Blog from '../components/Blog';
+import Blog from '../components/BlogCard';
 import { useEffect, useState } from 'react';
 import { useMatch } from 'react-router-dom';
 

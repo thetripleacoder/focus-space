@@ -25,7 +25,9 @@ const Menu = () => {
           <div className='w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm'>
             F
           </div>
-          <span className='text-lg font-semibold text-gray-800'>FaceBlog</span>
+          <span className='text-lg font-semibold text-gray-800'>
+            Focus Space
+          </span>
         </div>
 
         {/* Right: Navigation Tabs */}

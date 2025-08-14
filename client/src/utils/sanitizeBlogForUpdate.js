@@ -1,15 +1,5 @@
 export const sanitizeBlogForUpdate = (blog) => {
-  const {
-    title,
-    likes,
-    user,
-    genres,
-    comments,
-    likedBy,
-    createdAt,
-    url,
-    author,
-  } = blog;
+  const { title, likes, user, genres, comments, likedBy, createdAt } = blog;
 
   return {
     title,
@@ -19,7 +9,5 @@ export const sanitizeBlogForUpdate = (blog) => {
     comments,
     likedBy,
     createdAt,
-    url,
-    author,
   };
 };

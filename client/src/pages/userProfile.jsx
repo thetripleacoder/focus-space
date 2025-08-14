@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import BlogCard from '../components/BlogCard';
 
 const LoggedUserProfile = () => {
   const loggedUser = useSelector((state) => state.user.loggedUser);
@@ -39,25 +40,11 @@ const LoggedUserProfile = () => {
       <div>
         <h2 className='text-lg font-semibold text-gray-700 mb-4'>Your Posts</h2>
         {userBlogs.length > 0 ? (
-          <ul className='space-y-4'>
-            {userBlogs.map((post) => (
-              <li
-                key={post.id}
-                className='p-4 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition'
-              >
-                <Link
-                  to={`/blogs/${post.id}`}
-                  className='text-blue-600 font-semibold hover:underline'
-                >
-                  {post.title}
-                </Link>
-                <p className='text-sm text-gray-500'>Likes: {post.likes}</p>
-                <p className='text-xs text-gray-400'>
-                  Genres: {post.genres?.join(', ') || 'None'}
-                </p>
-              </li>
+          <>
+            {userBlogs.map((blog) => (
+              <BlogCard key={blog.id} selectedBlog={blog} />
             ))}
-          </ul>
+          </>
         ) : (
           <p className='text-sm text-gray-500 italic'>
             You haven’t posted anything yet.

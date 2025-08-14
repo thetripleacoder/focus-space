@@ -49,7 +49,11 @@ const update = async (id, newObject) => {
 
   console.log('update', newObject);
   const request = axios.patch(`${baseUrl}/${id}`, newObject, config);
-  return request.then((response) => response.data);
+
+  return request.then((response) => {
+    console.log('services/blogs.js', request);
+    return response.data;
+  });
 };
 
 const remove = async (id) => {

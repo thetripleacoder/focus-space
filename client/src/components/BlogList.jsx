@@ -5,13 +5,14 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Blog from './Blog';
+import BlogCard from './BlogCard';
 
 const BlogList = ({ blogs }) => {
+  console.log(blogs);
   return (
     <div className='px-4 py-6'>
-      <h1 className='text-2xl font-bold text-gray-900 mb-4'>Blogs</h1>
-      <TableContainer component={Paper} className='rounded-xl shadow-sm'>
+      {/* <h1 className='text-2xl font-bold text-gray-900 mb-4'>Blogs</h1> */}
+      {/* <TableContainer component={Paper} className='rounded-xl shadow-sm'>
         <Table>
           <TableBody>
             {blogs.map((blog) => (
@@ -23,7 +24,10 @@ const BlogList = ({ blogs }) => {
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </TableContainer> */}
+      {blogs.map((blog) => (
+        <BlogCard key={blog.id} selectedBlog={blog} />
+      ))}
     </div>
   );
 };

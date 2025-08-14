@@ -77,7 +77,7 @@ blogsRouter.patch(
         new: true,
         runValidators: true,
       }
-    );
+    ).populate('user', { id: 1, name: 1, username: 1 });
 
     if (!result) {
       return response.status(404).json({ error: 'No blog found to update' });
@@ -100,7 +100,7 @@ blogsRouter.put(
         runValidators: true,
         overwrite: true,
       }
-    );
+    ).populate('user', { id: 1, name: 1, username: 1 });
 
     if (!result) {
       return response.status(404).json({ error: 'No blog found to update' });

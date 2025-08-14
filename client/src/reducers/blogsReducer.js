@@ -88,6 +88,7 @@ export const likeBlog = (blog) => async (dispatch) => {
     ...sanitized,
     likes: (blog.likes || 0) + 1,
   };
+  console.log('likeBlog', updatedBlog);
 
   const result = await blogService.update(blog.id, updatedBlog);
   if (result) {
@@ -115,7 +116,7 @@ export const addCommentBlog = (blog, newComment, user) => async (dispatch) => {
       ...cleanedComments,
       {
         text: newComment.trim(),
-        author: user.name,
+        author: user.username,
         date: new Date().toISOString(),
       },
     ],
