@@ -175,7 +175,9 @@ const BlogCard = ({ selectedBlog }) => {
         {/* Comments Section */}
         <div className='mt-6'>
           <div className='flex items-center mb-3'>
-            <h3 className='text-base font-semibold text-gray-800'>Comments </h3>
+            <h3 className='text-base font-semibold text-gray-800'>
+              Comments ({selectedBlog.comments.length})
+            </h3>
             <IconButton
               onClick={() => setShowComments((prev) => !prev)}
               size='small'

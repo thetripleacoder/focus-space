@@ -13,6 +13,7 @@ import Users from './pages/users';
 import UserBlogs from './pages/userBlogs';
 import BlogDetails from './pages/blogDetails';
 import UserProfile from './pages/userProfile';
+import AppLayout from './components/AppLayout';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -28,7 +29,7 @@ const App = () => {
 
   useEffect(() => {
     if (loggedUser?.token) {
-      blogService.setToken(loggedUser.token); // Optional redundancy
+      blogService.setToken(loggedUser.token);
       dispatch(initializeBlogs());
       dispatch(initializeUsers());
     }
@@ -36,23 +37,23 @@ const App = () => {
 
   return (
     <div className='w-full'>
-      <Menu />
       <Notification />
 
-      <Routes>
-        {!loggedUser ? (
+      {!loggedUser ? (
+        <Routes>
           <Route path='/*' element={<LoginForm />} />
-        ) : (
-          <>
+        </Routes>
+      ) : (
+        <AppLayout>
+          <Routes>
             <Route path='/' element={<Blogs />} />
             <Route path='/blogs/:id' element={<BlogDetails />} />
             <Route path='/users/:id' element={<UserBlogs />} />
             <Route path='/users' element={<Users />} />
             <Route path='/profile' element={<UserProfile />} />
-            {/* <Route path="/create" element={<CreateBlog />} /> */}
-          </>
-        )}
-      </Routes>
+          </Routes>
+        </AppLayout>
+      )}
     </div>
   );
 };
