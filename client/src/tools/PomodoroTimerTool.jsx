@@ -9,7 +9,7 @@ import {
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PropTypes from 'prop-types';
 
-const PomodoroTimer = ({
+const PomodoroTimerTool = ({
   focusDuration = 25, // minutes
   breakDuration = 5,
   onSessionComplete,
@@ -98,10 +98,10 @@ const PomodoroTimer = ({
   );
 };
 
-PomodoroTimer.propTypes = {
+PomodoroTimerTool.propTypes = {
   focusDuration: PropTypes.number,
   breakDuration: PropTypes.number,
   onSessionComplete: PropTypes.func,
 };
 
-export default PomodoroTimer;
+export default PomodoroTimerTool;

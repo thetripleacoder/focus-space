@@ -7,13 +7,16 @@ import SettingsTool from '../tools/SettingsTool';
 import CodeTool from '../tools/CodeTool';
 import Menu from './Menu';
 import PropTypes from 'prop-types';
-import PomodoroTimer from '../tools/PomodoroTimer';
-
+import PomodoroTimerTool from '../tools/PomodoroTimerTool';
+import TasksTool from '../tools/TasksTool';
+import JournalTool from '../tools/JournalTool';
 const TOOLBAR_WIDTH = 64;
 const MENU_HEIGHT = 64;
 
 const toolRegistry = {
-  pomodoro: PomodoroTimer,
+  pomodoro: PomodoroTimerTool,
+  tasks: TasksTool,
+  journal: JournalTool,
   build: BuildTool,
   settings: SettingsTool,
   code: CodeTool,

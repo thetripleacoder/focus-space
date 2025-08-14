@@ -5,16 +5,20 @@ import {
   ListItemIcon,
   Tooltip,
 } from '@mui/material';
-import BuildIcon from '@mui/icons-material/Build';
-import SettingsIcon from '@mui/icons-material/Settings';
-import CodeIcon from '@mui/icons-material/Code';
-import TimerIcon from '@mui/icons-material/Timer';
-import PunchClockIcon from '@mui/icons-material/PunchClock';
+// import BuildIcon from '@mui/icons-material/Build';
+// import SettingsIcon from '@mui/icons-material/Settings';
+// import CodeIcon from '@mui/icons-material/Code';
+// import TimerIcon from '@mui/icons-material/Timer';
+import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import BookOutlinedIcon from '@mui/icons-material/BookOutlined';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const tools = [
-  { id: 'pomodoro', icon: <PunchClockIcon />, label: 'Pomodoro' },
+  { id: 'pomodoro', icon: <TimerOutlinedIcon />, label: 'Pomodoro' },
+  { id: 'tasks', icon: <TaskAltIcon />, label: 'Tasks' },
+  { id: 'journal', icon: <BookOutlinedIcon />, label: 'Journal' },
   // { id: 'build', icon: <BuildIcon />, label: 'Build' },
   // { id: 'settings', icon: <SettingsIcon />, label: 'Settings' },
   // { id: 'code', icon: <CodeIcon />, label: 'Code' },
