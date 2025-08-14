@@ -8,12 +8,16 @@ import {
 import BuildIcon from '@mui/icons-material/Build';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CodeIcon from '@mui/icons-material/Code';
+import TimerIcon from '@mui/icons-material/Timer';
+import PunchClockIcon from '@mui/icons-material/PunchClock';
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 
 const tools = [
-  { id: 'build', icon: <BuildIcon />, label: 'Build' },
-  { id: 'settings', icon: <SettingsIcon />, label: 'Settings' },
-  { id: 'code', icon: <CodeIcon />, label: 'Code' },
+  { id: 'pomodoro', icon: <PunchClockIcon />, label: 'Pomodoro' },
+  // { id: 'build', icon: <BuildIcon />, label: 'Build' },
+  // { id: 'settings', icon: <SettingsIcon />, label: 'Settings' },
+  // { id: 'code', icon: <CodeIcon />, label: 'Code' },
 ];
 
 const TOOLBAR_TOP_OFFSET = 64; // Match your Menu height
@@ -79,6 +83,10 @@ const ToolSidebar = ({ onSelectTool }) => {
       </List>
     </Drawer>
   );
+};
+
+ToolSidebar.propTypes = {
+  onSelectTool: PropTypes.func.isRequired,
 };
 
 export default ToolSidebar;

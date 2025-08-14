@@ -6,7 +6,6 @@ import { initializeBlogs } from './reducers/blogsReducer';
 import { initializeUsers, setUser } from './reducers/userReducer';
 import blogService from './services/blogs';
 import { loadFromLocalStorage } from './services/localStorage';
-import Menu from './components/Menu';
 import { Route, Routes } from 'react-router-dom';
 import Blogs from './pages/blogs';
 import Users from './pages/users';

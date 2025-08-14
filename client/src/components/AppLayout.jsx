@@ -6,11 +6,14 @@ import BuildTool from '../tools/BuildTool';
 import SettingsTool from '../tools/SettingsTool';
 import CodeTool from '../tools/CodeTool';
 import Menu from './Menu';
+import PropTypes from 'prop-types';
+import PomodoroTimer from '../tools/PomodoroTimer';
 
 const TOOLBAR_WIDTH = 64;
 const MENU_HEIGHT = 64;
 
 const toolRegistry = {
+  pomodoro: PomodoroTimer,
   build: BuildTool,
   settings: SettingsTool,
   code: CodeTool,
@@ -53,6 +56,7 @@ const AppLayout = ({ children }) => {
         marginTop={`${MENU_HEIGHT}px`}
         marginLeft={`${TOOLBAR_WIDTH}px`}
         height={`calc(100vh - ${MENU_HEIGHT}px)`}
+        overflow='hidden' // prevent outer scroll
       >
         {/* Animated Tool Panel */}
         {ToolComponent && (
@@ -79,12 +83,16 @@ const AppLayout = ({ children }) => {
         )}
 
         {/* Routed Content */}
-        <Box flex={1} p={2}>
+        <Box flex={1} p={2} overflow='auto' height='100%'>
           {children}
         </Box>
       </Box>
     </>
   );
+};
+
+AppLayout.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default AppLayout;

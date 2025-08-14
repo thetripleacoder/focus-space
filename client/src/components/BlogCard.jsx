@@ -1,13 +1,12 @@
 import { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { IconButton, TextField, CircularProgress, Badge } from '@mui/material';
+import { IconButton, TextField, CircularProgress } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import SendIcon from '@mui/icons-material/Send';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { Link, useNavigate } from 'react-router-dom';
 import { likeBlog, deleteBlog, addCommentBlog } from '../reducers/blogsReducer';
 import { showNotification } from '../reducers/notificationReducer';
