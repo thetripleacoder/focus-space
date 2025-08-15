@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, IconButton, Collapse, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
@@ -6,8 +6,7 @@ import ToolSidebar from './ToolSidebar';
 import Menu from './Menu';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { useCallback } from 'react';
-import throttle from 'lodash.throttle'; // install via npm if needed
+import throttle from 'lodash.throttle';
 
 // Tool Components
 import PomodoroTimerTool from '../tools/PomodoroTimerTool';
@@ -40,7 +39,8 @@ const toolRegistry = {
 const AppLayout = ({ children }) => {
   const [selectedTools, setSelectedTools] = useState([]);
   const [collapsedTools, setCollapsedTools] = useState({});
-  const [toolsWidth, setToolsWidth] = useState(320);
+  const [toolsWidth, setToolsWidth] = useState(400);
+  const [toolsVisible, setToolsVisible] = useState(true);
 
   const layoutRef = useRef(null);
 
@@ -54,9 +54,11 @@ const AppLayout = ({ children }) => {
   }, [selectedTools]);
 
   const handleToolSelect = (toolKey) => {
-    if (!selectedTools.includes(toolKey)) {
-      setSelectedTools([...selectedTools, toolKey]);
-    }
+    setSelectedTools((prev) =>
+      prev.includes(toolKey)
+        ? prev.filter((key) => key !== toolKey)
+        : [...prev, toolKey]
+    );
   };
 
   const handleToolClose = (toolKey) => {
@@ -86,7 +88,7 @@ const AppLayout = ({ children }) => {
         layoutWidth * MAX_WIDTH_RATIO
       );
       setToolsWidth(newWidth);
-    }, 50), // throttle to every 50ms
+    }, 50),
     []
   );
 
@@ -131,13 +133,15 @@ const AppLayout = ({ children }) => {
       >
         {/* Tools Panel */}
         <Box
-          width={selectedTools.length > 0 ? toolsWidth : 0}
-          p={selectedTools.length > 0 ? 2 : 0}
-          borderLeft={selectedTools.length > 0 ? '1px solid #ddd' : 'none'}
+          width={selectedTools.length > 0 && toolsVisible ? toolsWidth : 0}
+          p={selectedTools.length > 0 && toolsVisible ? 2 : 0}
+          borderLeft={
+            selectedTools.length > 0 && toolsVisible ? '1px solid #ddd' : 'none'
+          }
           bgcolor='#fafafa'
           display='flex'
           flexDirection='column'
-          overflow='hidden'
+          overflow='auto'
           flexShrink={0}
           position='relative'
           sx={{
@@ -146,7 +150,7 @@ const AppLayout = ({ children }) => {
           }}
         >
           {/* Resizer Handle */}
-          {selectedTools.length > 0 && (
+          {selectedTools.length > 0 && toolsVisible && (
             <Box
               position='absolute'
               top={0}
@@ -175,7 +179,10 @@ const AppLayout = ({ children }) => {
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   sx={{
-                    display: selectedTools.length > 0 ? 'flex' : 'none',
+                    display:
+                      selectedTools.length > 0 && toolsVisible
+                        ? 'flex'
+                        : 'none',
                     flexDirection: 'column',
                     gap: 2,
                   }}
@@ -268,6 +275,23 @@ const AppLayout = ({ children }) => {
             </Droppable>
           </DragDropContext>
         </Box>
+        {/* Toggle Button */}
+        {selectedTools.length > 0 && (
+          <Box position='relative' top={8} left={8} zIndex={20}>
+            <IconButton
+              onClick={() => setToolsVisible((prev) => !prev)}
+              size='small'
+              sx={{
+                px: 1.5, // ✅ Horizontal padding applied correctly
+                backgroundColor: '#eee',
+                border: '1px solid #ccc',
+                '&:hover': { backgroundColor: '#ddd' },
+              }}
+            >
+              {toolsVisible ? '🞬' : '🧰'}
+            </IconButton>
+          </Box>
+        )}
 
         {/* Routed Content */}
         <Box flex={1} p={2} overflow='auto' height='100%'>
