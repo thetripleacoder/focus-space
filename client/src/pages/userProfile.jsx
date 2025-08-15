@@ -15,6 +15,10 @@ const LoggedUserProfile = () => {
   }
 
   const userBlogs = blogs.filter((blog) => blog.isAddedByUser);
+  // Sort by createdAt descending (newest first)
+  const sortedBlogs = [...userBlogs].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
   const likedPosts = blogs.filter((blog) =>
     loggedUser.likedPosts?.some(
       (id) => id === blog.id || id === blog._id?.toString()
@@ -39,9 +43,9 @@ const LoggedUserProfile = () => {
       {/* User's Own Posts */}
       <div>
         <h2 className='text-lg font-semibold text-gray-700 mb-4'>Your Posts</h2>
-        {userBlogs.length > 0 ? (
+        {sortedBlogs.length > 0 ? (
           <>
-            {userBlogs.map((blog) => (
+            {sortedBlogs.map((blog) => (
               <BlogCard key={blog.id} selectedBlog={blog} />
             ))}
           </>

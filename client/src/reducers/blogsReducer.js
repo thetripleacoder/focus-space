@@ -14,8 +14,12 @@ const blogSlice = createSlice({
     },
 
     addBlog(state, action) {
-      state = [...state, action.payload]; // ✅ triggers re-render
+      const exists = state.some((blog) => blog.id === action.payload.id);
+      if (!exists) {
+        state.push(action.payload); // Immer handles this safely
+      }
     },
+
     updateBlog(state, action) {
       // console.log('dispatch updateBlog', action.payload);
       return state.map((blog) =>
