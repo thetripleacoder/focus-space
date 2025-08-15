@@ -1,18 +1,24 @@
-import { Alert } from '@mui/material';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Notification = () => {
   const notification = useSelector((state) => state.notification);
 
+  useEffect(() => {
+    if (notification) {
+      const { type, content } = notification;
+      if (type === 'success') {
+        toast.success(content);
+      } else {
+        toast.error(content);
+      }
+    }
+  }, [notification]);
+
   return (
-    notification && (
-      <Alert
-        severity={notification.type === 'success' ? 'success' : 'error'}
-        className='rounded-md shadow-sm'
-      >
-        {notification.content}
-      </Alert>
-    )
+    <ToastContainer position='bottom-right' autoClose={3000} hideProgressBar />
   );
 };
 

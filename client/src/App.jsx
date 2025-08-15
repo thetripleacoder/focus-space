@@ -61,14 +61,13 @@ const App = () => {
 
   return (
     <div className='w-full'>
-      <Notification />
-
       {!loggedUser ? (
         <Routes>
           <Route path='/*' element={<LoginForm />} />
         </Routes>
       ) : (
         <AppLayout>
+          <Notification />
           <Routes>
             <Route path='/' element={<Blogs />} />
             <Route path='/blogs/:id' element={<BlogDetails />} />
