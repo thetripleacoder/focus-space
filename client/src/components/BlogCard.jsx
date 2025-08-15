@@ -87,7 +87,7 @@ const BlogCard = ({ selectedBlog }) => {
   };
 
   return (
-    <div className='max-w-2xl mx-auto mt-6 bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition-all'>
+    <div className='max-w-2xl mx-auto mt-6  rounded-2xl shadow-md border border-gray-500 hover:shadow-lg transition-all'>
       {/* Blog Header */}
       <div className='px-6 py-4 border-b border-gray-100 flex justify-between'>
         <div>

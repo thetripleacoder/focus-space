@@ -7,6 +7,8 @@ import Menu from './Menu';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import throttle from 'lodash.throttle';
+import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 
 // Tool Components
 import PomodoroTimerTool from '../tools/PomodoroTimerTool';
@@ -282,13 +284,20 @@ const AppLayout = ({ children }) => {
               onClick={() => setToolsVisible((prev) => !prev)}
               size='small'
               sx={{
-                px: 1.5, // ✅ Horizontal padding applied correctly
+                width: 40,
+                height: 40,
+                padding: 0,
                 backgroundColor: '#eee',
-                border: '1px solid #ccc',
+                border: '3px solid #ccc',
+                borderRadius: 0, // ✅ Removes rounded corners
                 '&:hover': { backgroundColor: '#ddd' },
               }}
             >
-              {toolsVisible ? '🞬' : '🧰'}
+              {toolsVisible ? (
+                <KeyboardDoubleArrowLeftIcon />
+              ) : (
+                <KeyboardDoubleArrowRightIcon />
+              )}
             </IconButton>
           </Box>
         )}

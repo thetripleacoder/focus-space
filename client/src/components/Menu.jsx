@@ -18,20 +18,27 @@ const Menu = () => {
   };
 
   return (
-    <AppBar position='static' className=' shadow-md'>
+    <AppBar
+      position='static'
+      sx={{ backgroundColor: '#0d47a1' }} // Dark blue
+      className='shadow-md'
+    >
       <Toolbar className='flex justify-between items-center px-4'>
         {/* Left: Logo */}
         <div className='flex items-center gap-3'>
-          <div className='w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm'>
+          {/* <div className='w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm'>
             F
-          </div>
-          <span className='text-lg font-semibold text-gray-800'>
-            Focus Space
+          </div> */}
+          <span className='text-sm font-semibold text-gray-800'>
+            <img
+              src='assets/images/focus-space-logo.png'
+              className='w-25'
+            ></img>
           </span>
         </div>
 
-        {/* Right: Navigation Tabs */}
-        <div className='flex items-center gap-6'>
+        {/* Center: Navigation Tabs */}
+        <div className='my-2 flex items-center gap-6'>
           <Button
             color='inherit'
             component={Link}
@@ -41,16 +48,22 @@ const Menu = () => {
             Home
           </Button>
 
+          {loggedUser && (
+            <Button
+              color='inherit'
+              component={Link}
+              to='/profile'
+              className='text-gray-700 font-medium hover:text-blue-600 transition'
+            >
+              Profile
+            </Button>
+          )}
+        </div>
+
+        {/* Right: Navigation Tabs */}
+        <div className='my-2 flex items-center gap-6'>
           {loggedUser ? (
             <>
-              <Button
-                color='inherit'
-                component={Link}
-                to='/profile'
-                className='text-gray-700 font-medium hover:text-blue-600 transition'
-              >
-                Profile
-              </Button>
               <Button
                 color='inherit'
                 onClick={handleLogout}
