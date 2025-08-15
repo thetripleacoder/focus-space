@@ -13,6 +13,8 @@ import UserBlogs from './pages/userBlogs';
 import BlogDetails from './pages/blogDetails';
 import UserProfile from './pages/userProfile';
 import AppLayout from './components/AppLayout';
+import socket from './socket';
+import { addBlog, updateBlog, removeBlog } from './reducers/blogsReducer';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -33,6 +35,29 @@ const App = () => {
       dispatch(initializeUsers());
     }
   }, [loggedUser, dispatch]);
+
+  useEffect(() => {
+    socket.connect();
+
+    socket.on('blogCreated', (newBlog) => {
+      dispatch(addBlog(newBlog));
+    });
+
+    socket.on('blogUpdated', (updatedBlog) => {
+      dispatch(updateBlog(updatedBlog));
+    });
+
+    socket.on('blogDeleted', (deletedId) => {
+      dispatch(removeBlog(deletedId));
+    });
+
+    return () => {
+      socket.off('blogCreated');
+      socket.off('blogUpdated');
+      socket.off('blogDeleted');
+      socket.disconnect();
+    };
+  }, []);
 
   return (
     <div className='w-full'>

@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import blogService from '../services/blogs';
-import { initializeUsers } from './userReducer';
+// import { initializeUsers } from './userReducer';
 import { sanitizeBlogForUpdate } from '../utils/sanitizeBlogForUpdate';
+import socket from '../socket';
 
 const initialState = [];
 const blogSlice = createSlice({
@@ -78,8 +79,7 @@ export const initializeBlogs = () => async (dispatch, getState) => {
 export const createBlog = (blog) => async (dispatch) => {
   const newBlog = await blogService.create(blog);
   dispatch(addBlog(newBlog));
-  dispatch(initializeBlogs()); // refresh blogs
-  dispatch(initializeUsers());
+  socket.emit('blogCreated', newBlog);
 };
 
 export const likeBlog = (blog) => async (dispatch) => {
@@ -88,12 +88,10 @@ export const likeBlog = (blog) => async (dispatch) => {
     ...sanitized,
     likes: (blog.likes || 0) + 1,
   };
-  console.log('likeBlog', updatedBlog);
-
   const result = await blogService.update(blog.id, updatedBlog);
   if (result) {
     dispatch(updateBlog(result));
-    dispatch(initializeBlogs());
+    socket.emit('blogUpdated', result);
   }
 };
 
@@ -101,15 +99,9 @@ export const addCommentBlog = (blog, newComment, user) => async (dispatch) => {
   if (!newComment?.trim()) return;
 
   const cleanedComments =
-    blog.comments?.filter(
-      (comment) =>
-        comment?.text?.trim() !== '' &&
-        comment?.text !== undefined &&
-        comment?.text !== null
-    ) || [];
+    blog.comments?.filter((comment) => comment?.text?.trim()) || [];
 
   const sanitized = sanitizeBlogForUpdate(blog);
-
   const updatedBlog = {
     ...sanitized,
     comments: [
@@ -125,13 +117,14 @@ export const addCommentBlog = (blog, newComment, user) => async (dispatch) => {
   const result = await blogService.update(blog.id, updatedBlog);
   if (result) {
     dispatch(updateBlog(result));
-    dispatch(initializeBlogs());
+    socket.emit('blogUpdated', result);
   }
 };
 
 export const deleteBlog = (id) => async (dispatch) => {
   await blogService.remove(id);
   dispatch(removeBlog(id));
+  socket.emit('blogDeleted', id);
 };
 
 export default blogSlice.reducer;
