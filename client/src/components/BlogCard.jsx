@@ -146,12 +146,27 @@ const BlogCard = ({ selectedBlog }) => {
             </div>
           ) : (
             <>
-              <h2 className='text-xl font-bold text-gray-900 hover:text-blue-600 transition'>
-                <Link to={`/blogs/${selectedBlog.id}`}>
-                  {selectedBlog.title}
-                </Link>
-              </h2>
-              <p className='flex gap-1 text-sm text-gray-500'>
+              <div className='flex items-center gap-4'>
+                <div>
+                  {selectedBlog.user.avatar ? (
+                    <img
+                      src={selectedBlog.user.avatar}
+                      alt={`${selectedBlog.user.name}'s avatar`}
+                      className='w-10 h-10 rounded-full object-cover border border-gray-300'
+                    />
+                  ) : (
+                    <div className='w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold'>
+                      {selectedBlog.user.name?.charAt(0).toUpperCase() ?? 'U'}
+                    </div>
+                  )}
+                </div>
+                <h2 className='text-xl font-bold text-gray-900 hover:text-blue-600 transition'>
+                  <Link to={`/blogs/${selectedBlog.id}`}>
+                    {selectedBlog.title}
+                  </Link>
+                </h2>
+              </div>
+              <p className='pl-1 pt-2 flex gap-1 text-sm text-gray-500'>
                 <span>
                   Posted by{' '}
                   <Link

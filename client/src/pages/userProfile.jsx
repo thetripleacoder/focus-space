@@ -12,7 +12,7 @@ const LoggedUserProfile = () => {
     );
   }
 
-  return <UserDetails user={loggedUser} />;
+  return loggedUser && <UserDetails user={loggedUser} />;
 };
 
 export default LoggedUserProfile;
