@@ -3,7 +3,7 @@ import UserDetails from '../components/userDetails';
 import { useMatch } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
-const OtherUserDetails = () => {
+const OtherUserProfile = () => {
   const selectedUserId = useMatch('/users/:id')?.params.id;
   const [selectedUser, setSelectedUser] = useState({});
   const users = useSelector((state) => state.user.users);
@@ -31,4 +31,4 @@ const OtherUserDetails = () => {
   return selectedUser.id && <UserDetails user={selectedUser} />;
 };
 
-export default OtherUserDetails;
+export default OtherUserProfile;

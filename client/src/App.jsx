@@ -14,7 +14,7 @@ import UserProfile from './pages/userProfile';
 import AppLayout from './components/AppLayout';
 import socket from './socket';
 import { addBlog, updateBlog, removeBlog } from './reducers/blogsReducer';
-import OtherUserDetails from './pages/otherUserProfile';
+import OtherUserProfile from './pages/otherUserProfile';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -71,7 +71,7 @@ const App = () => {
           <Routes>
             <Route path='/' element={<Blogs />} />
             <Route path='/blogs/:id' element={<BlogDetails />} />
-            <Route path='/users/:id' element={<OtherUserDetails />} />
+            <Route path='/users/:id' element={<OtherUserProfile />} />
             <Route path='/users' element={<Users />} />
             <Route path='/profile' element={<UserProfile />} />
           </Routes>
