@@ -7,7 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import SendIcon from '@mui/icons-material/Send';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { likeBlog, deleteBlog, addCommentBlog } from '../reducers/blogsReducer';
 import { showNotification } from '../reducers/notificationReducer';
 import { useField } from '../hooks';
@@ -15,7 +15,7 @@ import Toggleable from './Toggleable';
 
 const BlogCard = ({ selectedBlog }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const comment = useField('text');
   const commentToggleRef = useRef();
   const commentsEndRef = useRef(null);
@@ -47,7 +47,7 @@ const BlogCard = ({ selectedBlog }) => {
       )
     ) {
       dispatch(deleteBlog(selectedBlog.id));
-      navigate('/');
+
       dispatch(
         showNotification(
           {
@@ -89,18 +89,30 @@ const BlogCard = ({ selectedBlog }) => {
   return (
     <div className='max-w-2xl mx-auto mt-6  rounded-2xl shadow-md border border-gray-500 hover:shadow-lg transition-all'>
       {/* Blog Header */}
-      <div className='px-6 py-4 border-b border-gray-100 flex justify-between'>
+      <div className='px-6 py-4  flex justify-between'>
         <div>
           <h2 className='text-xl font-bold text-gray-900 hover:text-blue-600 transition'>
             <Link to={`/blogs/${selectedBlog.id}`}>{selectedBlog.title}</Link>
           </h2>
 
-          <p className='text-sm text-gray-500'>
-            Posted by {selectedBlog.user.username}
+          <p className='flex gap-1 text-sm text-gray-500'>
+            <span>
+              Posted by{' '}
+              <Link
+                to={`/users/${selectedBlog.user.id}`}
+                className='hover:underline'
+              >
+                {selectedBlog.user.username}
+              </Link>
+            </span>
+            <span>
+              on{' '}
+              {selectedBlog.createdAt &&
+                new Date(selectedBlog.createdAt).toUTCString()}
+            </span>
           </p>
         </div>
         <div>
-          {' '}
           {selectedBlog?.isAddedByUser && (
             <IconButton
               onClick={handleRemoveBlog}
@@ -114,9 +126,19 @@ const BlogCard = ({ selectedBlog }) => {
           )}
         </div>
       </div>
+      <div className='px-5 flex  gap-2 flex-wrap'>
+        {selectedBlog.genres.map((genre) => (
+          <span
+            key={genre}
+            className='bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm flex items-center gap-1'
+          >
+            {genre}
+          </span>
+        ))}
+      </div>
 
       {/* Blog Actions */}
-      <div className='px-6 py-4 space-y-4'>
+      <div className='px-6 pt-4'>
         <div className=' flex items-center'>
           <span className='font-semibold text-blue-600'></span>
           <IconButton
@@ -172,7 +194,7 @@ const BlogCard = ({ selectedBlog }) => {
         </Toggleable>
 
         {/* Comments Section */}
-        <div className='mt-6'>
+        <div className='pb-6'>
           <div className='flex items-center mb-3'>
             <h3 className='text-base font-semibold text-gray-800'>
               Comments ({selectedBlog.comments.length})
@@ -228,6 +250,7 @@ BlogCard.propTypes = {
   selectedBlog: PropTypes.shape({
     id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
+    createdAt: PropTypes.string.isRequired,
     user: PropTypes.shape({
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
@@ -242,6 +265,7 @@ BlogCard.propTypes = {
         date: PropTypes.string,
       })
     ),
+    genres: PropTypes.array.isRequired,
   }),
 };
 

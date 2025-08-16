@@ -9,6 +9,7 @@ export default function BlogDetails() {
   const [selectedBlog, setSelectedBlog] = useState({});
 
   useEffect(() => {
+    // console.log('Selected blog ID:', selectedBlogId);
     if (selectedBlogId && blogs.length) {
       let matchedSelectedBlog = blogs.find(
         (blog) => blog.id === selectedBlogId
@@ -17,5 +18,5 @@ export default function BlogDetails() {
       // console.log(matchedSelectedBlog, blogs);
     }
   }, [blogs, selectedBlogId]);
-  return <Blog selectedBlog={selectedBlog} />;
+  return selectedBlog.id && <Blog selectedBlog={selectedBlog} />;
 }

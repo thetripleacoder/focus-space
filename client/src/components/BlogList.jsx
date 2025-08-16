@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import BlogCard from './BlogCard';
 
 const BlogList = ({ blogs }) => {
-  console.log(blogs);
+  // console.log(blogs);
   return (
     <div className='px-4 py-6'>
       {/* <h1 className='text-2xl font-bold text-gray-900 mb-4'>Blogs</h1> */}

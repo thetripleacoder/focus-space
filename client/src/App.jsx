@@ -9,12 +9,12 @@ import { loadFromLocalStorage } from './services/localStorage';
 import { Route, Routes } from 'react-router-dom';
 import Blogs from './pages/blogs';
 import Users from './pages/users';
-import UserBlogs from './pages/userBlogs';
 import BlogDetails from './pages/blogDetails';
 import UserProfile from './pages/userProfile';
 import AppLayout from './components/AppLayout';
 import socket from './socket';
 import { addBlog, updateBlog, removeBlog } from './reducers/blogsReducer';
+import OtherUserDetails from './pages/otherUserProfile';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -71,7 +71,7 @@ const App = () => {
           <Routes>
             <Route path='/' element={<Blogs />} />
             <Route path='/blogs/:id' element={<BlogDetails />} />
-            <Route path='/users/:id' element={<UserBlogs />} />
+            <Route path='/users/:id' element={<OtherUserDetails />} />
             <Route path='/users' element={<Users />} />
             <Route path='/profile' element={<UserProfile />} />
           </Routes>

@@ -30,7 +30,7 @@ export default function JournalTool() {
     setEntries(newEntries);
     setNote('');
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newEntries));
-    console.log('New entry added:', newEntries);
+    // console.log('New entry added:', newEntries);
   };
 
   // Optional: sync localStorage if entries change externally
