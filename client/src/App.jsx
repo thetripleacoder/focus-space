@@ -21,7 +21,7 @@ const App = () => {
   const loggedUser = useSelector((state) => state.user?.loggedUser ?? null);
 
   useEffect(() => {
-    const storedUser = loadFromLocalStorage('loggedUser');
+    const storedUser = loadFromLocalStorage('focus-space-loggedUser');
     if (storedUser && storedUser.token) {
       dispatch(setUser(storedUser));
       blogService.setToken(storedUser.token);

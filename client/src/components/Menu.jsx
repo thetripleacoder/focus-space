@@ -11,7 +11,7 @@ const Menu = () => {
   const loggedUser = useSelector((state) => state.user?.loggedUser ?? null);
 
   const handleLogout = () => {
-    removeFromLocalStorage('loggedUser');
+    removeFromLocalStorage('focus-space-loggedUser');
     dispatch(logoutUser());
     dispatch(resetBlogs());
     navigate('/');

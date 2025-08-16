@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -11,22 +11,45 @@ import {
 } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
+const STORAGE_KEY = 'focus-space-tasks';
 const priorities = ['High', 'Medium', 'Low'];
 
 export default function TasksTool() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    try {
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [input, setInput] = useState('');
   const [priority, setPriority] = useState('Medium');
 
   const addTask = () => {
     if (!input.trim()) return;
-    setTasks([...tasks, { text: input, priority }]);
+    const newTasks = [...tasks, { text: input, priority }];
+    setTasks(newTasks);
     setInput('');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newTasks));
   };
 
   const removeTask = (index) => {
-    setTasks(tasks.filter((_, i) => i !== index));
+    const updated = tasks.filter((_, i) => i !== index);
+    setTasks(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   };
+
+  // Optional: sync across tabs
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const updated = localStorage.getItem(STORAGE_KEY);
+      if (updated) setTasks(JSON.parse(updated));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <Box display='flex' flexDirection='column' gap={2}>

@@ -9,15 +9,52 @@ import {
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PropTypes from 'prop-types';
 
+const STORAGE_KEY = 'focus-space-pomodoro';
+
 const PomodoroTimerTool = ({
-  focusDuration = 25, // minutes
+  focusDuration = 25,
   breakDuration = 5,
   onSessionComplete,
 }) => {
-  const [isFocus, setIsFocus] = useState(true);
-  const [secondsLeft, setSecondsLeft] = useState(focusDuration * 60);
-  const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef(null);
+
+  const getInitialState = () => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        return {
+          isFocus: parsed.isFocus ?? true,
+          secondsLeft: parsed.secondsLeft ?? focusDuration * 60,
+          isRunning: parsed.isRunning ?? false,
+        };
+      } catch {
+        return {
+          isFocus: true,
+          secondsLeft: focusDuration * 60,
+          isRunning: false,
+        };
+      }
+    }
+    return {
+      isFocus: true,
+      secondsLeft: focusDuration * 60,
+      isRunning: false,
+    };
+  };
+
+  const initial = getInitialState();
+  const [isFocus, setIsFocus] = useState(initial.isFocus);
+  const [secondsLeft, setSecondsLeft] = useState(initial.secondsLeft);
+  const [isRunning, setIsRunning] = useState(initial.isRunning);
+
+  // Persist entire state to localStorage
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ isFocus, secondsLeft, isRunning })
+    );
+  }, [isFocus, secondsLeft, isRunning]);
 
   useEffect(() => {
     if (isRunning) {
@@ -49,7 +86,8 @@ const PomodoroTimerTool = ({
 
   const handleReset = () => {
     clearInterval(intervalRef.current);
-    setSecondsLeft(isFocus ? focusDuration * 60 : breakDuration * 60);
+    const resetTime = isFocus ? focusDuration * 60 : breakDuration * 60;
+    setSecondsLeft(resetTime);
     setIsRunning(false);
   };
 

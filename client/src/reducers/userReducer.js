@@ -8,7 +8,7 @@ import blogService from '../services/blogs';
 import userService from '../services/users';
 
 const initialState = {
-  loggedUser: loadFromLocalStorage('loggedUser') || null,
+  loggedUser: loadFromLocalStorage('focus-space-loggedUser') || null,
   users: [],
 };
 
@@ -38,13 +38,13 @@ export const initializeUsers = () => async (dispatch) => {
 };
 export const loginUser = (userData) => async (dispatch) => {
   console.log('Logging in user:', userData);
-  saveToLocalStorage('loggedUser', userData);
+  saveToLocalStorage('focus-space-loggedUser', userData);
   blogService.setToken(userData.token);
   dispatch(setUser(userData));
 };
 
 export const logoutUser = () => async (dispatch) => {
-  removeFromLocalStorage('loggedUser');
+  removeFromLocalStorage('focus-space-loggedUser');
   blogService.setToken(null);
   dispatch(logout());
 };

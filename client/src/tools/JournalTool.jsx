@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -9,16 +9,39 @@ import {
   ListItemText,
 } from '@mui/material';
 
+const STORAGE_KEY = 'focus-space-journal';
+
 export default function JournalTool() {
-  const [entries, setEntries] = useState([]);
+  const [entries, setEntries] = useState(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    try {
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [note, setNote] = useState('');
 
   const addEntry = () => {
     if (!note.trim()) return;
     const timestamp = new Date().toLocaleString();
-    setEntries([{ note, timestamp }, ...entries]);
+    const newEntries = [{ note, timestamp }, ...entries];
+    setEntries(newEntries);
     setNote('');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newEntries));
+    console.log('New entry added:', newEntries);
   };
+
+  // Optional: sync localStorage if entries change externally
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const updated = localStorage.getItem(STORAGE_KEY);
+      if (updated) setEntries(JSON.parse(updated));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <Box display='flex' flexDirection='column' gap={2}>
