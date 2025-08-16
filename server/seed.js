@@ -22,8 +22,18 @@ const seed = async () => {
 
     console.log('👥 Seeding users...');
     const seedUsers = [
-      { username: 'aldous', name: 'Aldous Dev', passwordHash },
-      { username: 'luna', name: 'Luna Tester', passwordHash },
+      {
+        username: 'aldous',
+        name: 'Aldous Dev',
+        avatar: 'https://api.dicebear.com/9.x/bottts/svg?seed=aldous',
+        passwordHash,
+      },
+      {
+        username: 'luna',
+        name: 'Luna Tester',
+        avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=luna',
+        passwordHash,
+      },
     ];
     const insertedUsers = await User.insertMany(seedUsers);
     console.log(
