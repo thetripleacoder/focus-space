@@ -26,9 +26,18 @@ const UserDetails = ({ user }) => {
     <div className='max-w-4xl mx-auto mt-10 px-4 space-y-10'>
       {/* Profile Header */}
       <div className='flex items-center gap-4'>
-        <div className='w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold'>
-          {user.name?.charAt(0).toUpperCase() ?? 'U'}
-        </div>
+        {user.avatar ? (
+          <img
+            src={user.avatar}
+            alt={`${user.name}'s avatar`}
+            className='w-16 h-16 rounded-full object-cover border border-gray-300'
+          />
+        ) : (
+          <div className='w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold'>
+            {user.name?.charAt(0).toUpperCase() ?? 'U'}
+          </div>
+        )}
+
         <div>
           <h1 className='text-2xl font-bold text-gray-800'>{user.name}</h1>
           <p className='text-sm text-gray-500'>@{user.username}</p>
@@ -90,6 +99,7 @@ UserDetails.propTypes = {
   user: PropTypes.shape({
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
+    avatar: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
     likedPosts: PropTypes.arrayOf(
       PropTypes.oneOfType([PropTypes.string, PropTypes.number])

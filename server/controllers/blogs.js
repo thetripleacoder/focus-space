@@ -9,7 +9,7 @@ const createBlogsRouter = (io) => {
 
   blogsRouter.get('/', async (req, res) => {
     const blogs = await Blog.find({})
-      .populate('user', { username: 1, name: 1 })
+      .populate('user', { username: 1, name: 1, avatar: 1 })
       .populate('likedBy', { username: 1, name: 1 });
 
     res.json(blogs);
@@ -35,6 +35,7 @@ const createBlogsRouter = (io) => {
       const populatedBlog = await savedBlog.populate('user', {
         username: 1,
         name: 1,
+        avatar: 1,
       });
 
       io.emit('blogCreated', populatedBlog); // ✅ Emit to all clients
@@ -44,8 +45,8 @@ const createBlogsRouter = (io) => {
 
   blogsRouter.get('/:id', async (req, res) => {
     const blog = await Blog.findById(req.params.id)
-      .populate('user', { username: 1, name: 1 })
-      .populate('likedBy', { username: 1, name: 1 });
+      .populate('user', { username: 1, name: 1, avatar: 1 })
+      .populate('likedBy', { username: 1, name: 1, avatar: 1 });
 
     if (blog) {
       res.json({ message: 'Successfully retrieved blog', data: blog });
@@ -83,7 +84,7 @@ const createBlogsRouter = (io) => {
           new: true,
           runValidators: true,
         }
-      ).populate('user', { id: 1, name: 1, username: 1 });
+      ).populate('user', { id: 1, name: 1, username: 1, avatar: 1 });
 
       if (!result) {
         return res.status(404).json({ error: 'No blog found to update' });
@@ -106,7 +107,7 @@ const createBlogsRouter = (io) => {
           runValidators: true,
           overwrite: true,
         }
-      ).populate('user', { id: 1, name: 1, username: 1 });
+      ).populate('user', { id: 1, name: 1, username: 1, avatar: 1 });
 
       if (!result) {
         return res.status(404).json({ error: 'No blog found to update' });

@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import loginService from '../services/login';
 import { loginUser } from '../reducers/userReducer';
 import { Button, TextField } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const LoginForm = () => {
   const dispatch = useDispatch();
@@ -19,13 +19,12 @@ const LoginForm = () => {
         username: username.inputProps.value,
         password: password.inputProps.value,
       });
-      // console.log('user', user);
 
-      dispatch(loginUser(user)); // Automatically sets token and localStorage
-
+      dispatch(loginUser(user));
       username.reset();
       password.reset();
-      navigate('/'); // Navigate to home after login
+      navigate('/');
+
       dispatch(
         showNotification(
           {
@@ -36,16 +35,8 @@ const LoginForm = () => {
         )
       );
     } catch (error) {
-      console.log('error', error);
-      console.log(username.inputProps.value, password.inputProps.value);
       dispatch(
-        showNotification(
-          {
-            type: 'error',
-            content: 'Wrong credentials!',
-          },
-          5
-        )
+        showNotification({ type: 'error', content: 'Wrong credentials!' }, 5)
       );
     }
   };
@@ -62,6 +53,7 @@ const LoginForm = () => {
             <TextField variant='standard' {...inputProps} className='flex-1' />
           </div>
         ))}
+
         <div className='flex justify-center mt-4'>
           <Button
             variant='outlined'
@@ -70,6 +62,13 @@ const LoginForm = () => {
           >
             Login
           </Button>
+        </div>
+
+        <div className='flex justify-center mt-4 text-sm text-gray-500'>
+          <span>Don’t have an account?&nbsp;</span>
+          <Link to='/register' className='text-blue-500 hover:underline'>
+            Register here
+          </Link>
         </div>
       </form>
     </div>

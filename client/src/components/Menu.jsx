@@ -14,7 +14,7 @@ const Menu = () => {
     removeFromLocalStorage('focus-space-loggedUser');
     dispatch(logoutUser());
     dispatch(resetBlogs());
-    navigate('/');
+    navigate('/login');
   };
 
   return (

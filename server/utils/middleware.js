@@ -101,7 +101,7 @@ const sanitizeAndValidateBlog = (req, res, next) => {
 };
 
 // --- Allowed fields for User creation ---
-const allowedUserFields = ['username', 'name', 'password'];
+const allowedUserFields = ['username', 'name', 'avatar', 'password'];
 
 // --- Sanitize User Payload ---
 const sanitizeUserPayload = (payload = {}) => {

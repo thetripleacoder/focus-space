@@ -344,6 +344,7 @@ BlogCard.propTypes = {
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       username: PropTypes.string.isRequired,
+      avatar: PropTypes.string.isRequired,
     }),
     likes: PropTypes.number.isRequired,
     isAddedByUser: PropTypes.bool,

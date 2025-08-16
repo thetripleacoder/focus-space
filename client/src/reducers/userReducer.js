@@ -49,4 +49,10 @@ export const logoutUser = () => async (dispatch) => {
   dispatch(logout());
 };
 
+export const createUser = (user) => async (dispatch) => {
+  const newUser = await userService.create(user);
+  console.log('New user created:', newUser);
+  // dispatch(createUser(newUser));
+};
+
 export default userSlice.reducer;

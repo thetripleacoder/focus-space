@@ -8,7 +8,7 @@ usersRouter.post(
   '/',
   middleware.sanitizeAndValidateUser,
   async (request, response) => {
-    const { username, name, password } = request.sanitizedBody;
+    const { username, name, avatar, password } = request.sanitizedBody;
 
     const isValidUsername =
       typeof username === 'string' && username.length >= 3;
@@ -31,6 +31,7 @@ usersRouter.post(
     const user = new User({
       username,
       name,
+      avatar,
       passwordHash,
       likedPosts: [],
     });

@@ -15,6 +15,7 @@ import AppLayout from './components/AppLayout';
 import socket from './socket';
 import { addBlog, updateBlog, removeBlog } from './reducers/blogsReducer';
 import OtherUserProfile from './pages/otherUserProfile';
+import RegisterForm from './components/RegisterForm';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -63,6 +64,7 @@ const App = () => {
     <div className='w-full'>
       {!loggedUser ? (
         <Routes>
+          <Route path='/register' element={<RegisterForm />} />
           <Route path='/*' element={<LoginForm />} />
         </Routes>
       ) : (
