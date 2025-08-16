@@ -4,11 +4,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IconButton, TextField, CircularProgress } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import SendIcon from '@mui/icons-material/Send';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Link } from 'react-router-dom';
-import { likeBlog, deleteBlog, addCommentBlog } from '../reducers/blogsReducer';
+import {
+  likeBlog,
+  deleteBlog,
+  addCommentBlog,
+  updateBlogThunk,
+} from '../reducers/blogsReducer';
 import { showNotification } from '../reducers/notificationReducer';
 import { useField } from '../hooks';
 import Toggleable from './Toggleable';
@@ -22,6 +30,13 @@ const BlogCard = ({ selectedBlog }) => {
   const user = useSelector((state) => state.user?.loggedUser ?? {});
   const [isSending, setIsSending] = useState(false);
   const [showComments, setShowComments] = useState(false);
+
+  // New: edit states
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(selectedBlog?.title || '');
+  const [editGenres, setEditGenres] = useState(
+    selectedBlog?.genres?.join(', ') || ''
+  );
 
   if (!selectedBlog) {
     return <div className='text-center text-gray-500'>Loading...</div>;
@@ -86,57 +101,131 @@ const BlogCard = ({ selectedBlog }) => {
     }, 100);
   };
 
+  // New: save edits
+  const handleSaveEdit = () => {
+    const updated = {
+      ...selectedBlog,
+      title: editTitle.trim(),
+      genres: editGenres
+        .split(',')
+        .map((g) => g.trim())
+        .filter(Boolean),
+    };
+    dispatch(updateBlogThunk(updated));
+    dispatch(
+      showNotification(
+        { type: 'success', content: `Blog updated successfully` },
+        5
+      )
+    );
+    setIsEditing(false);
+  };
+
   return (
     <div className='max-w-2xl mx-auto mt-6  rounded-2xl shadow-md border border-gray-500 hover:shadow-lg transition-all'>
       {/* Blog Header */}
-      <div className='px-6 py-4  flex justify-between'>
+      <div className='px-6 py-4 flex justify-between'>
         <div>
-          <h2 className='text-xl font-bold text-gray-900 hover:text-blue-600 transition'>
-            <Link to={`/blogs/${selectedBlog.id}`}>{selectedBlog.title}</Link>
-          </h2>
-
-          <p className='flex gap-1 text-sm text-gray-500'>
-            <span>
-              Posted by{' '}
-              <Link
-                to={`/users/${selectedBlog.user.id}`}
-                className='hover:underline'
-              >
-                {selectedBlog.user.username}
-              </Link>
-            </span>
-            <span>
-              on{' '}
-              {selectedBlog.createdAt &&
-                new Date(selectedBlog.createdAt).toUTCString()}
-            </span>
-          </p>
+          {isEditing ? (
+            <div className='flex flex-col gap-2'>
+              <TextField
+                size='small'
+                label='Title'
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                fullWidth
+                className='mb-2'
+              />
+              <TextField
+                size='small'
+                label='Genres (comma separated)'
+                value={editGenres}
+                onChange={(e) => setEditGenres(e.target.value)}
+                fullWidth
+              />
+            </div>
+          ) : (
+            <>
+              <h2 className='text-xl font-bold text-gray-900 hover:text-blue-600 transition'>
+                <Link to={`/blogs/${selectedBlog.id}`}>
+                  {selectedBlog.title}
+                </Link>
+              </h2>
+              <p className='flex gap-1 text-sm text-gray-500'>
+                <span>
+                  Posted by{' '}
+                  <Link
+                    to={`/users/${selectedBlog.user.id}`}
+                    className='hover:underline'
+                  >
+                    {selectedBlog.user.username}
+                  </Link>
+                </span>
+                <span>
+                  on{' '}
+                  {selectedBlog.createdAt &&
+                    new Date(selectedBlog.createdAt).toUTCString()}
+                </span>
+              </p>
+            </>
+          )}
         </div>
-        <div>
+        <div className='flex flex-col items-end gap-1'>
           {selectedBlog?.isAddedByUser && (
-            <IconButton
-              onClick={handleRemoveBlog}
-              color='error'
-              size='small'
-              data-testid='remove-button'
-              className='mb-2'
-            >
-              <DeleteIcon />
-            </IconButton>
+            <>
+              {isEditing ? (
+                <>
+                  <IconButton
+                    color='success'
+                    size='small'
+                    onClick={handleSaveEdit}
+                  >
+                    <SaveIcon />
+                  </IconButton>
+                  <IconButton
+                    color='inherit'
+                    size='small'
+                    onClick={() => setIsEditing(false)}
+                  >
+                    <CancelIcon />
+                  </IconButton>
+                </>
+              ) : (
+                <>
+                  <IconButton
+                    color='primary'
+                    size='small'
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={handleRemoveBlog}
+                    color='error'
+                    size='small'
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </>
+              )}
+            </>
           )}
         </div>
       </div>
-      <div className='px-5 flex  gap-2 flex-wrap'>
-        {selectedBlog.genres.map((genre) => (
-          <span
-            key={genre}
-            className='bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm flex items-center gap-1'
-          >
-            {genre}
-          </span>
-        ))}
-      </div>
 
+      {/* Genres display */}
+      {!isEditing && (
+        <div className='px-5 flex gap-2 flex-wrap'>
+          {selectedBlog.genres.map((genre) => (
+            <span
+              key={genre}
+              className='bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm'
+            >
+              {genre}
+            </span>
+          ))}
+        </div>
+      )}
       {/* Blog Actions */}
       <div className='px-6 pt-4'>
         <div className=' flex items-center'>

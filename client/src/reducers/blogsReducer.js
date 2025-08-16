@@ -125,6 +125,23 @@ export const addCommentBlog = (blog, newComment, user) => async (dispatch) => {
   }
 };
 
+export const updateBlogThunk = (blog) => async (dispatch) => {
+  // Sanitize before sending to API
+  const sanitized = sanitizeBlogForUpdate(blog);
+
+  try {
+    const result = await blogService.update(blog.id, sanitized);
+
+    if (result) {
+      dispatch(updateBlog(result)); // update local state
+      socket.emit('blogUpdated', result); // notify collaborators in real-time
+    }
+  } catch (error) {
+    console.error('Failed to update blog:', error);
+    // optional: trigger a notification here
+  }
+};
+
 export const deleteBlog = (id) => async (dispatch) => {
   await blogService.remove(id);
   dispatch(removeBlog(id));
