@@ -1,5 +1,5 @@
 import axios from 'axios';
-const baseUrl = '/api/blogs';
+const baseUrl = `${import.meta.env.VITE_API_BASE}/blogs`;
 
 let token = null;
 
