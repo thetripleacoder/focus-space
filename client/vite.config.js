@@ -2,14 +2,20 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// https://vitejs.dev/config/
+// Define API targets
+const API_TARGET =
+  process.env.NODE_ENV === 'production'
+    ? 'https://focus-space.onrender.com/'
+    : 'http://localhost:3003';
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3003',
+        target: API_TARGET,
         changeOrigin: true,
+        secure: false,
       },
     },
   },
