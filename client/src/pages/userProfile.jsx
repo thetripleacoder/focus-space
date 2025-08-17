@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import UserDetails from '../components/userDetails';
+import UserDetails from '../components/UserDetails';
 
 const LoggedUserProfile = () => {
   const loggedUser = useSelector((state) => state.user.loggedUser);

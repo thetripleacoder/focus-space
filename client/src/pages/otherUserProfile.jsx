@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import UserDetails from '../components/userDetails';
+import UserDetails from '../components/UserDetails';
 import { useMatch } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
