@@ -61,7 +61,7 @@ const App = () => {
   }, []);
 
   return (
-    <div className='w-full'>
+    <div className='w-full bg-white'>
       {!loggedUser ? (
         <Routes>
           <Route path='/register' element={<RegisterForm />} />
