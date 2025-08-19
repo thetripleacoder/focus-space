@@ -49,7 +49,7 @@ export const logoutUser = () => async (dispatch) => {
   dispatch(logout());
 };
 
-export const createUser = (user) => async (dispatch) => {
+export const createUser = (user) => async () => {
   const newUser = await userService.create(user);
   console.log('New user created:', newUser);
   // dispatch(createUser(newUser));

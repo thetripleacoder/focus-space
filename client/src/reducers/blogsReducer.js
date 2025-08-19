@@ -1,10 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import blogService from '../services/blogs';
-// import { initializeUsers } from './userReducer';
 import { sanitizeBlogForUpdate } from '../utils/sanitizeBlogForUpdate';
-import socket from '../socket';
 
 const initialState = [];
+
 const blogSlice = createSlice({
   name: 'blogs',
   initialState,
@@ -12,16 +11,13 @@ const blogSlice = createSlice({
     setBlogs(state, action) {
       return action.payload;
     },
-
     addBlog(state, action) {
       const exists = state.some((blog) => blog.id === action.payload.id);
       if (!exists) {
-        state.push(action.payload); // Immer handles this safely
+        state.push(action.payload);
       }
     },
-
     updateBlog(state, action) {
-      // console.log('dispatch updateBlog', action.payload);
       return state.map((blog) =>
         blog.id === action.payload.id ? action.payload : blog
       );
@@ -38,7 +34,7 @@ const blogSlice = createSlice({
       );
     },
     sortByLikes(state) {
-      state.sort((a, b) => b.likes - a.likes); // mutate state in-place
+      state.sort((a, b) => b.likes - a.likes);
     },
     resetBlogs() {
       return initialState;
@@ -48,7 +44,6 @@ const blogSlice = createSlice({
 
 export const {
   setBlogs,
-  setSelectedBlog,
   addBlog,
   updateBlog,
   removeBlog,
@@ -62,28 +57,16 @@ export const {
 export const initializeBlogs = () => async (dispatch, getState) => {
   const userId = getState().user?.loggedUser.id;
   const blogs = await blogService.getAll();
-  // console.log(userId);
   if (userId) {
     dispatch(setBlogs(blogs));
     dispatch(markUserBlogs(userId));
     dispatch(sortByLikes());
-    // console.log(getState());
   }
 };
-
-// export const refreshBlogList = () => async (dispatch, getState) => {
-//   const userId = getState().user?.id;
-//   // console.log(userId);
-//   const blogs = await blogService.getAll();
-//   dispatch(setBlogs(blogs));
-//   dispatch(markUserBlogs(userId));
-//   dispatch(sortByLikes());
-// };
 
 export const createBlog = (blog) => async (dispatch) => {
   const newBlog = await blogService.create(blog);
   dispatch(addBlog(newBlog));
-  socket.emit('blogCreated', newBlog);
 };
 
 export const likeBlog = (blog) => async (dispatch) => {
@@ -95,7 +78,6 @@ export const likeBlog = (blog) => async (dispatch) => {
   const result = await blogService.update(blog.id, updatedBlog);
   if (result) {
     dispatch(updateBlog(result));
-    socket.emit('blogUpdated', result);
   }
 };
 
@@ -121,31 +103,24 @@ export const addCommentBlog = (blog, newComment, user) => async (dispatch) => {
   const result = await blogService.update(blog.id, updatedBlog);
   if (result) {
     dispatch(updateBlog(result));
-    socket.emit('blogUpdated', result);
   }
 };
 
 export const updateBlogThunk = (blog) => async (dispatch) => {
-  // Sanitize before sending to API
   const sanitized = sanitizeBlogForUpdate(blog);
-
   try {
     const result = await blogService.update(blog.id, sanitized);
-
     if (result) {
-      dispatch(updateBlog(result)); // update local state
-      socket.emit('blogUpdated', result); // notify collaborators in real-time
+      dispatch(updateBlog(result));
     }
   } catch (error) {
     console.error('Failed to update blog:', error);
-    // optional: trigger a notification here
   }
 };
 
 export const deleteBlog = (id) => async (dispatch) => {
   await blogService.remove(id);
   dispatch(removeBlog(id));
-  socket.emit('blogDeleted', id);
 };
 
 export default blogSlice.reducer;

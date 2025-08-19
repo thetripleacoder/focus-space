@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Notification from './components/Notification';
 import LoginForm from './components/LoginForm';
 import { initializeBlogs } from './reducers/blogsReducer';
-import { initializeUsers, setUser } from './reducers/userReducer';
+import { initializeUsers, setUser, logout } from './reducers/userReducer';
 import blogService from './services/blogs';
 import { loadFromLocalStorage } from './services/localStorage';
 import { Navigate, Route, Routes } from 'react-router-dom';
@@ -13,14 +13,15 @@ import BlogDetails from './pages/blogDetails';
 import UserProfile from './pages/userProfile';
 import AppLayout from './components/AppLayout';
 import socket from './socket';
-import { addBlog, updateBlog, removeBlog } from './reducers/blogsReducer';
 import OtherUserProfile from './pages/otherUserProfile';
 import RegisterForm from './components/RegisterForm';
+import { registerSocketListeners } from './socketListeners';
 
 const App = () => {
   const dispatch = useDispatch();
   const loggedUser = useSelector((state) => state.user?.loggedUser ?? null);
 
+  // 🔐 Initial login from localStorage
   useEffect(() => {
     const storedUser = loadFromLocalStorage('focus-space-loggedUser');
     if (storedUser && storedUser.token) {
@@ -29,6 +30,27 @@ const App = () => {
     }
   }, [dispatch]);
 
+  // 🔄 Sync login/logout across tabs
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (event.key === 'focus-space-loggedUser') {
+        const newUser = event.newValue ? JSON.parse(event.newValue) : null;
+
+        if (newUser?.token) {
+          dispatch(setUser(newUser));
+          blogService.setToken(newUser.token);
+        } else {
+          dispatch(logout());
+          blogService.setToken(null);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [dispatch]);
+
+  // 📦 Load data after login
   useEffect(() => {
     if (loggedUser?.token) {
       blogService.setToken(loggedUser.token);
@@ -37,28 +59,21 @@ const App = () => {
     }
   }, [loggedUser, dispatch]);
 
+  // 🔌 Socket setup
   useEffect(() => {
-    socket.connect();
+    if (!loggedUser?.token) return;
+    if (!socket.connected) socket.connect();
 
-    socket.on('blogCreated', (newBlog) => {
-      dispatch(addBlog(newBlog));
-    });
-
-    socket.on('blogUpdated', (updatedBlog) => {
-      dispatch(updateBlog(updatedBlog));
-    });
-
-    socket.on('blogDeleted', (deletedId) => {
-      dispatch(removeBlog(deletedId));
-    });
+    registerSocketListeners(dispatch);
 
     return () => {
       socket.off('blogCreated');
       socket.off('blogUpdated');
       socket.off('blogDeleted');
+      socket.off('userLoggedIn');
       socket.disconnect();
     };
-  }, []);
+  }, [loggedUser, dispatch]);
 
   return (
     <div className='w-full bg-white'>
@@ -66,7 +81,6 @@ const App = () => {
         <Routes>
           <Route path='/register' element={<RegisterForm />} />
           <Route path='/login' element={<LoginForm />} />
-          {/* Catch-all: redirect to login */}
           <Route path='*' element={<Navigate to='/login' replace />} />
         </Routes>
       ) : (
@@ -78,7 +92,6 @@ const App = () => {
             <Route path='/users/:id' element={<OtherUserProfile />} />
             <Route path='/users' element={<Users />} />
             <Route path='/profile' element={<UserProfile />} />
-            {/* Catch-all: redirect to home */}
             <Route path='*' element={<Navigate to='/home' replace />} />
           </Routes>
         </AppLayout>
