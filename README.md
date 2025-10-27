@@ -1,106 +1,107 @@
-# 🧠 Focus Space
+# Full-Stack Focus Space Application 📚
 
-**Focus Space** is a modular, real-time productivity cockpit designed for students, professionals, and anyone seeking deep focus. It combines animated tool panels, persistent layouts, and collaborative workflows to minimize cognitive friction and maximize flow. Beyond productivity, Focus Space introduces a social layer—enabling users to post thoughts, share progress, and engage with a community of like-minded individuals. Think of it as a social platform purpose-built for hustle culture.
+This project comprises a comprehensive full-stack application, named **Focus Space**, designed for blog list management, real-time communication, and integrated client-side productivity.
 
-## 🚀 Core Features
+-----
 
-- 🧩 **Stackable Tool Panels**  
-  Includes Pomodoro Timer, Task Prioritizer, and Focus Journal with drag-and-drop, collapsible sections, and resizable containers.
+## 1\. System Architecture Overview 🗺️
 
-- ⚡ **Real-Time Collaboration**  
-  WebSocket-powered updates for synchronized blog editing and shared workspace interactions.
+**Focus Space** follows a **Decoupled Monorepo Architecture**, clearly separating the **Server (API)** from the **Client (SPA)** but unifying management within a single structure.
 
-- 🎯 **Registry-Driven UI Architecture**  
-  Dynamically rendered panels based on a centralized registry, enabling context-aware transitions and persistent state management.
+| Layer | Technology | Primary Role | Communication |
+| :--- | :--- | :--- | :--- |
+| **Client** | React, Redux Toolkit, Socket.IO Client | User Interface, State Management, Real-time Rendering | **REST** (Axios) for CRUD, **WebSockets** (Socket.IO) for Real-time Updates |
+| **Server** | Node.js, Express, MongoDB, Socket.IO Server | REST API, Data Persistence, Authentication, Real-time Broadcasting | **Mongoose** (ODM) for MongoDB, **JWT** for Security |
 
-- 🛠️ **Customizable Layouts**  
-  Adjustable widths, hide/show toggles, and ergonomic affordances for frictionless user experience.
+### Real-time Data Flow
 
-- 🔒 **Backend-First Design**  
-  Strict schema validation, modular middleware, and scalable API endpoints ensure data integrity and maintainability.
+The core feature is instant synchronization:
 
-## 🧱 Tech Stack
+1.  **Client Action** (e.g., liking a blog) triggers a **REST** $\text{PATCH}$ request to the server.
+2.  **Server** updates the database, then uses the **Socket.IO Server** to instantly broadcast an event (e.g., `blogUpdated`) to **all connected clients**.
+3.  **Clients** receive the event, and the **`socketListeners.js`** file dispatches a Redux action, causing the UI to re-render immediately without polling.
 
-| Layer        | Technology                     |
-|--------------|--------------------------------|
-| Frontend     | React, Redux, Tailwind CSS     |
-| Backend      | Express, Mongoose              |
-| Real-Time    | Socket.IO                      |
-| UI/UX        | Framer Motion, Responsive Layouts |
-| Dev Tools    | ESLint, Prettier, Husky        |
+-----
 
-## 📦 Installation
+## 2\. Server API (Backend) ⚙️
 
-```bash
-git clone https://github.com/thetripleacoder/focus-space.git
-cd focus-space
-npm install
-```
+The server is a highly modular Node.js application built on Express.
 
-## 🧪 Development
+### Testing Strategy (Integration Focus)
 
-```bash
-# Start frontend
-cd client
-npm run dev
+The server prioritizes **Integration Testing** using **Node's native test runner** and **Supertest**. This ensures API endpoints, database interactions, and middleware (authentication, error handling) function correctly as a single unit.
 
-# Start backend
-cd server
-npm run dev
-```
+| Test Type | Tools Used | Focus/Goal |
+| :--- | :--- | :--- |
+| **Integration Tests** | **`node:test`**, **Supertest** | Verifies the full request-response cycle for CRUD operations, checks $\text{HTTP}$ status codes ($\text{200}$, $\text{201}$, $\text{400}$), and validates authentication logic. |
 
-## 🔄 WebSocket Event Registry
+### Best Practices for Scalability & Maintainability
 
-| Event Name         | Description                          |
-|--------------------|--------------------------------------|
-| `blog:created`     | Broadcasts newly created blog posts  |
-| `blog:updated`     | Syncs blog edits across clients      |
-| `blog:deleted`     | Propagates blog deletions in real-time|
+  * **Real-time Decoupling:** The global $\text{Socket.IO}$ registry allows for future **horizontal scaling** by integrating a $\text{Socket.IO}$ adapter (like Redis).
+  * **Security:** Authentication is handled by $\text{JWT}$. Routes are protected by dedicated middleware ($\text{tokenExtractor}$/$\text{userExtractor}$).
+  * **Data Integrity:** Payloads are sanitized, and $\text{Mongoose}$ schemas enforce consistent data structure, reducing vulnerability to unexpected input.
 
-## 📁 Folder Structure
+-----
 
-```
-focus-space/
-├── client/src
-│   ├── components/     # Reusable UI components
-│   ├── hooks/          # Custom React hooks
-│   ├── pages/          # Route-based views
-│   ├── reducers/       # Redux state slices
-│   ├── services/       # API interaction logic
-│   ├── socket/         # WebSocket client setup
-│   ├── tools/          # Registry-driven tool panels
-│   ├── utils/          # Utility functions
-├── server/
-│   ├── models/         # Mongoose schemas
-│   ├── controllers/    # Business logic handlers
-│   ├── routes/         # RESTful API endpoints
-└── README.md
-```
+## 3\. Client Application (Frontend) 💻
 
-## 🧠 Design Philosophy
+The client is a performant single-page application built on React, utilizing Redux for state management.
 
-Focus Space is engineered for developers who prioritize:
-- **Modularity**: Each tool is encapsulated and independently extensible.
-- **Ergonomics**: Layouts are optimized for cognitive clarity and minimal friction.
-- **Extensibility**: Registry-driven architecture supports dynamic tool injection.
-- **Real-Time Feedback**: WebSocket infrastructure ensures instant collaboration.
+### Testing Strategy (Component Focus)
 
-## 📌 Roadmap
+The client uses **Vitest** as the test runner and **React Testing Library (RTL)** for component testing, ensuring a user-centric verification process.
 
-- [ ] Real-Time Chat Messaging
-- [ ] Focus Leaderboard with activity metrics
-- [ ] Theme toggling (light/dark)
-- [ ] Plugin system for third-party tool integration
+| Test Type | Tools Used | Focus/Goal |
+| :--- | :--- | :--- |
+| **Component Tests** | **Vitest**, **RTL**, `user-event` | Verifies that individual UI components (e.g., `<Blog />`, `<BlogForm />`) render correctly, simulate user actions (clicks, typing), and correctly fire the associated event handlers/props. |
+| **Unit Tests** | **Vitest** | Used for isolated testing of Redux reducers, thunks, and pure utility functions. |
 
-## 🤝 Contributing
+### Architecture and Core Features
 
-Contributions are welcome! If you plan to introduce major changes, please open an issue first to discuss your proposal.
+#### State Management and Synchronization
 
-## 📜 License
+  * **Redux Toolkit:** Manages all server-synced data (`blogs`, `users`) with asynchronous logic handled by **Thunks**.
+  * **Session Persistence:** The user $\text{JWT}$ is stored in $\text{localStorage}$. A browser $\text{storage}$ event listener ensures **login status synchronizes across multiple browser tabs** without delays.
 
-[MIT](LICENSE)
+#### Integrated Productivity Tools (Client-Side Only)
 
----
+The **Focus Space** application includes dedicated tools that manage their state locally for speed and separation of concerns.
 
-Crafted for clarity. Built for flow.  
-**Focus Space** is your developer cockpit for deep work and meaningful connection.
+| Tool Name | Persistence Mechanism | Focus |
+| :--- | :--- | :--- |
+| **Tasks Tool** | `localStorage` (key: `focus-space-tasks`) | Prioritization and management of to-do items (High, Medium, Low). |
+| **Pomodoro Timer Tool** | `localStorage` (key: `focus-space-pomodoro`) | Customizable focus/break time management and session tracking. |
+| **Journal Tool** | `localStorage` (key: `focus-space-journal`) | Quick logging of thoughts and notes with timestamps. |
+
+-----
+
+## 4\. Setup and Development
+
+### Prerequisites
+
+  * Node.js (v18 or higher)
+  * MongoDB instance (local or remote URI)
+
+### Installation and Run
+
+1.  **Install Dependencies:** Run `npm install` (in both `server/` and `client/` directories if using distinct $\text{package.json}$ files).
+2.  **Environment Setup:** Create a **`.env`** file in the server root directory:
+    ```
+    PORT=3003
+    MONGODB_URI=mongodb://localhost:27017/focus-space-dev
+    SECRET=your_super_secret_jwt_key
+    # Client variables (used in client build process)
+    VITE_API_BASE=http://localhost:3003/api
+    VITE_SOCKET_URL=http://localhost:3003
+    ```
+
+### Available Commands
+
+| Layer | Script | Command | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Server** | `npm start` | `cross-env NODE_ENV=production node index.js` | Runs the server in production mode. |
+| **Server** | `npm run dev` | `cross-env NODE_ENV=development nodemon index.js` | Starts the server with **nodemon** (auto-reloads). |
+| **Server** | `npm run test-jest` | `cross-env NODE_ENV=test jest ...` | Runs **Integration Tests** against the test database. |
+| **Client** | `npm run dev` | `vite` | Starts the client development server with HMR. |
+| **Client** | `npm run build` | `vite build` | Builds the production static assets. |
+| **Client** | `npm run test` | `vitest run` | Runs **Component/Unit Tests** using Vitest. |
