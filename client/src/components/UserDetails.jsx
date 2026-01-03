@@ -14,7 +14,15 @@ const UserDetails = ({ user }) => {
     );
   }
 
-  const userBlogs = blogs.filter((blog) => blog.user.id === user.id);
+  // Add isAddedByUser flag to blogs
+  const blogsWithUserFlag = blogs.map((blog) => ({
+    ...blog,
+    isAddedByUser: blog.user?.id === user.id,
+  }));
+
+  const userBlogs = blogsWithUserFlag.filter(
+    (blog) => blog.user.id === user.id
+  );
   const sortedBlogs = [...userBlogs].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
