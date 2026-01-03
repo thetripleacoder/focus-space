@@ -1,13 +1,26 @@
 // socketListeners.js
 import socket from './socket';
-import { addBlog, updateBlog, removeBlog } from './reducers/blogsReducer';
 import { initializeUsers } from './reducers/userReducer';
 import { showNotification } from './reducers/notificationReducer';
 
-export const registerSocketListeners = (dispatch) => {
-  socket.on('blogCreated', (blog) => dispatch(addBlog(blog)));
-  socket.on('blogUpdated', (blog) => dispatch(updateBlog(blog)));
-  socket.on('blogDeleted', (id) => dispatch(removeBlog(id)));
+export const registerSocketListeners = (dispatch, queryClient) => {
+  socket.on('blogCreated', () => {
+    // Invalidate blogs list query to refetch data
+    queryClient.invalidateQueries({ queryKey: ['blogs', 'list'] });
+  });
+
+  socket.on('blogUpdated', (blog) => {
+    // Invalidate blogs list and specific blog detail
+    queryClient.invalidateQueries({ queryKey: ['blogs', 'list'] });
+    queryClient.invalidateQueries({ queryKey: ['blogs', 'detail', blog.id] });
+  });
+
+  socket.on('blogDeleted', (id) => {
+    // Invalidate blogs list query
+    queryClient.invalidateQueries({ queryKey: ['blogs', 'list'] });
+    // Remove from cache
+    queryClient.removeQueries({ queryKey: ['blogs', 'detail', id] });
+  });
 
   socket.on('userLoggedIn', (user) => {
     console.log(`${user.username} just logged in`);

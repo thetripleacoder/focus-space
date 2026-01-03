@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import BlogCard from './BlogCard';
+import { useBlogs } from '../hooks';
 
 const UserDetails = ({ user }) => {
-  const blogs = useSelector((state) => state.blogs);
+  const { data: blogs = [] } = useBlogs();
 
   if (!user) {
     return (

@@ -1,12 +1,13 @@
 import { useMatch } from 'react-router-dom';
 import BlogList from '../components/BlogList';
 import { useSelector } from 'react-redux';
+import { useBlogs } from '../hooks';
 
 export default function UserBlogs() {
   const selectedUserId = useMatch('/users/:id')?.params.id;
   const users = useSelector((state) => state.user.users);
   const selectedUser = users.find((user) => user.id === selectedUserId);
-  const blogs = useSelector((state) => state.blogs);
+  const { data: blogs = [] } = useBlogs();
   const filteredBlogs = blogs.filter((blog) => blog.user.id === selectedUserId);
 
   return (

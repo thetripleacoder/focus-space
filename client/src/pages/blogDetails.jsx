@@ -1,22 +1,26 @@
-import { useSelector } from 'react-redux';
 import Blog from '../components/BlogCard';
-import { useEffect, useState } from 'react';
 import { useMatch } from 'react-router-dom';
+import { useBlog } from '../hooks';
 
 export default function BlogDetails() {
-  const blogs = useSelector((state) => state.blogs);
   const selectedBlogId = useMatch('/blogs/:id')?.params.id;
-  const [selectedBlog, setSelectedBlog] = useState({});
+  const { data: blog, isLoading, error } = useBlog(selectedBlogId);
 
-  useEffect(() => {
-    // console.log('Selected blog ID:', selectedBlogId);
-    if (selectedBlogId && blogs.length) {
-      let matchedSelectedBlog = blogs.find(
-        (blog) => blog.id === selectedBlogId
-      );
-      setSelectedBlog(matchedSelectedBlog);
-      // console.log(matchedSelectedBlog, blogs);
-    }
-  }, [blogs, selectedBlogId]);
-  return selectedBlog.id && <Blog selectedBlog={selectedBlog} />;
+  if (isLoading) {
+    return (
+      <div className='flex justify-center items-center min-h-64'>
+        <div className='text-lg'>Loading blog...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex justify-center items-center min-h-64'>
+        <div className='text-red-500'>Error loading blog: {error.message}</div>
+      </div>
+    );
+  }
+
+  return blog && <Blog selectedBlog={blog} />;
 }

@@ -1,10 +1,10 @@
-import { useSelector } from 'react-redux';
 import { useState } from 'react';
+import { useBlogs } from '../hooks';
 import BlogList from '../components/BlogList';
 import CreateBlog from './createBlog';
 
 export default function Blogs() {
-  const blogs = useSelector((state) => state.blogs);
+  const { data: blogs = [], isLoading, error } = useBlogs();
 
   const [searchTitle, setSearchTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
@@ -27,6 +27,22 @@ export default function Blogs() {
     const dateB = new Date(b.createdAt);
     return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
   });
+
+  if (isLoading) {
+    return (
+      <div className='flex justify-center items-center min-h-64'>
+        <div className='text-lg'>Loading blogs...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex justify-center items-center min-h-64'>
+        <div className='text-red-500'>Error loading blogs: {error.message}</div>
+      </div>
+    );
+  }
 
   return (
     <>

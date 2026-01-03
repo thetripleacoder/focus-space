@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createBlog } from '../reducers/blogsReducer';
+import { useCreateBlog } from '../hooks';
 import { showNotification } from '../reducers/notificationReducer';
 import { TextField, IconButton, Tooltip, Fab } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -15,6 +15,7 @@ const BlogForm = ({ toggleRef }) => {
   const [titleTouched, setTitleTouched] = useState(false);
   const dispatch = useDispatch();
   const loggedUser = useSelector((state) => state.user.loggedUser);
+  const createBlogMutation = useCreateBlog();
 
   const handleAddGenre = (e) => {
     e.preventDefault();
@@ -41,7 +42,7 @@ const BlogForm = ({ toggleRef }) => {
     };
 
     try {
-      await dispatch(createBlog(payload));
+      await createBlogMutation.mutateAsync(payload);
       setTitle('');
       setGenres([]);
       setGenreInput('');

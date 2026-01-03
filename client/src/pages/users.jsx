@@ -1,8 +1,9 @@
 import { useSelector } from 'react-redux';
 import UserList from '../components/UserList';
+import { useBlogs } from '../hooks';
 
 export default function Users() {
-  const blogs = useSelector((state) => state.blogs);
+  const { data: blogs = [] } = useBlogs();
   const users = useSelector((state) => state.user.users);
   const enrichedUsers = users.map((user) => ({
     ...user,

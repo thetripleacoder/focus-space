@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 import Notification from './components/Notification';
 import LoginForm from './components/LoginForm';
-import { initializeBlogs } from './reducers/blogsReducer';
 import { initializeUsers, setUser, logout } from './reducers/userReducer';
 import blogService from './services/blogs';
 import { loadFromLocalStorage } from './services/localStorage';
@@ -19,6 +19,7 @@ import { registerSocketListeners } from './socketListeners';
 
 const App = () => {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const loggedUser = useSelector((state) => state.user?.loggedUser ?? null);
 
   // 🔐 Initial login from localStorage
@@ -54,7 +55,6 @@ const App = () => {
   useEffect(() => {
     if (loggedUser?.token) {
       blogService.setToken(loggedUser.token);
-      dispatch(initializeBlogs());
       dispatch(initializeUsers());
     }
   }, [loggedUser, dispatch]);
@@ -64,7 +64,7 @@ const App = () => {
     if (!loggedUser?.token) return;
     if (!socket.connected) socket.connect();
 
-    registerSocketListeners(dispatch);
+    registerSocketListeners(dispatch, queryClient);
 
     return () => {
       socket.off('blogCreated');
@@ -73,7 +73,7 @@ const App = () => {
       socket.off('userLoggedIn');
       socket.disconnect();
     };
-  }, [loggedUser, dispatch]);
+  }, [loggedUser, dispatch, queryClient]);
 
   return (
     <div className='w-full bg-white'>
