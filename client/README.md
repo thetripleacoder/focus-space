@@ -1,6 +1,6 @@
-# Blog List Client Application (Frontend) 💻
+# Focus Space Client Application (Frontend) 💻
 
-This is the client-side application for the **Blog List** service, built as a modern Single-Page Application (SPA) using **React** and managed with **Vite**. It provides a rich user interface, centralized state management via **Redux Toolkit**, real-time data synchronization through **Socket.IO**, and integrated **Productivity Tools** for focused work.
+This is the client-side application for the **Focus Space** productivity platform, built as a modern Single-Page Application (SPA) using **React** and managed with **Vite**. It provides a rich user interface with **hybrid state management** (React Query + Redux), real-time data synchronization through **Socket.IO**, blog management with **optimistic updates**, and integrated **Productivity Tools** for focused work.
 
 ---
 
@@ -12,9 +12,10 @@ The frontend is a contemporary React application prioritizing centralized state,
 | :--- | :--- | :--- |
 | **React** | Component-Based UI | **`src/main.jsx`** renders the root `<App />` component, handling the routing and providing the Redux store and MUI theme context. |
 | **Vite** | Build Tool & Dev Server | Used for fast development (`npm run dev`) and efficient bundling (`npm run build`). |
-| **Redux Toolkit** | Global State Management | **`src/store.js`** configures the central store for **`blogs`**, **`user`**, and **`notification`**. **Thunks** handle all asynchronous API calls and state updates. |
+| **TanStack Query (React Query)** | Server State Management | **`src/hooks/useBlogs.js`** provides custom hooks for blog CRUD operations with **optimistic updates**, caching, and background refetching. |
+| **Redux Toolkit** | Client State Management | **`src/store.js`** manages **`user`** authentication and **`notification`** states. Redux handles UI state and cross-component communication. |
 | **React Router v6** | Client-Side Routing | **`src/App.jsx`** defines all application routes and uses authentication logic to guard navigation. |
-| **Socket.IO Client** | Real-time Updates | **`src/App.jsx`** connects the socket client upon user login. **`src/socketListeners.js`** maps incoming server events (`blogCreated`, `blogUpdated`, etc.) directly to **Redux actions**, instantly updating the UI state. |
+| **Socket.IO Client** | Real-time Updates | **`src/App.jsx`** connects the socket client upon user login. **`src/socketListeners.js`** maps incoming server events (`blogCreated`, `blogUpdated`, etc.) to **React Query cache invalidation**, instantly updating the UI state. |
 | **MUI & Tailwind CSS** | Styling and UI Components | **`@mui/material`** provides rich components, styled via **`@emotion`**. **`tailwindcss`** is used for utility-first styling (imported in `src/index.css`). |
 | **Local Storage** | Client-side Persistence | Used by the **`TasksTool`**, **`JournalTool`**, and **`userReducer`** to store session data (JWT) and user-specific tool data persistently across sessions and tabs. |
 
@@ -22,18 +23,42 @@ The frontend is a contemporary React application prioritizing centralized state,
 
 ## Key Functional Wiring 💡
 
-### 1. State Management and Data Flow (Redux)
+### 1. Hybrid State Management (React Query + Redux)
 
-* **Central Store (`src/store.js`):** Centralizes application data, making it accessible to all components via the **`useSelector`** hook.
-* **Async Logic (Thunks):** All interaction with the backend API (`src/services/`) is handled via **async thunks** within the Redux reducers. For example, `blogsReducer` contains thunks like `initializeBlogs` and `likeBlog`, which manage the full lifecycle of a data request.
-* **User Session:** The **`userReducer`** manages the **JWT token** and user profile, saving/loading the session data to **`localStorage`** using `src/services/localStorage.js`.
+The application uses a **hybrid state management approach** optimized for different types of state:
+
+#### **Server State (React Query):**
+
+* **Blog Operations:** **`src/hooks/useBlogs.js`** provides custom hooks (`useBlogs`, `useCreateBlog`, `useUpdateBlog`, `useDeleteBlog`, `useLikeBlog`) with **optimistic updates** for immediate UI feedback.
+* **Caching & Synchronization:** Automatic background refetching, cache invalidation, and real-time updates via Socket.IO integration.
+* **Optimistic Updates:** All blog mutations provide instant UI feedback with automatic rollback on API errors.
+
+#### **Client State (Redux):**
+
+* **Central Store (`src/store.js`):** Manages **`user`** authentication and **`notification`** states via **`useSelector`** hook.
+* **User Session:** The **`userReducer`** handles **JWT tokens** and user profiles, persisting to **`localStorage`** using `src/services/localStorage.js`.
+* **UI State:** Notifications, modal states, and cross-component communication.
+
+#### **Blog Editing Features:**
+
+* **Owner-Only Editing:** Users can edit/delete their own blogs from the blog list, detail pages, and profile page.
+* **Inline Editing:** Click-to-edit functionality with title and genre modifications.
+* **Permission Checks:** Edit controls only appear for blog owners (`isAddedByUser` flag).
+* **Real-time Sync:** Changes are immediately reflected across all views via React Query.
+
+#### **Like System:**
+
+* **Toggle Functionality:** Users can like and unlike blogs (one like per user per blog).
+* **Optimistic Updates:** Like counts update instantly with proper rollback on errors.
+* **Real-time Sync:** Like changes broadcast to all connected users via Socket.IO.
 
 ### 2. Real-time Synchronization
 
-The client maintains a persistent, event-driven connection to the server:
+The client maintains a persistent, event-driven connection to the server for instant cross-user updates:
 
 * **Managed Connection:** The Socket.IO client is initialized in **`src/socket.js`** and its connection/disconnection lifecycle is tightly coupled with the user's login state in **`App.jsx`**.
-* **Event Handling (`src/socketListeners.js`):** This file is the bridge, dynamically mapping server events to Redux actions. When the server broadcasts a `blogUpdated` event (e.g., a like count changes), the listener immediately dispatches `dispatch(updateBlog(blog))`, causing the UI to re-render instantly with the new data.
+* **Event Handling (`src/socketListeners.js`):** Maps server events to **React Query cache invalidation**. When the server broadcasts events (`blogCreated`, `blogUpdated`, `blogDeleted`), the listeners trigger cache invalidation, causing React Query to refetch data and update the UI instantly across all connected clients.
+* **Optimistic + Real-time Combo:** Local optimistic updates provide immediate feedback, while Socket.IO ensures consistency when multiple users interact simultaneously.
 
 ### 3. Integrated Productivity Tools (Client-Side State)
 
@@ -78,9 +103,10 @@ All routes are defined in **`App.jsx`** and are guarded by the `loggedUser` stat
 
 User 1:
 
-- username: sampleuser
-- password: sampleuser
+* username: sampleuser
+* password: sampleuser
 
 User 2:
-- username: sampleuser2
-- password: sampleuser2
+
+* username: sampleuser2
+* password: sampleuser2
