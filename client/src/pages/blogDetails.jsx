@@ -1,10 +1,20 @@
 import Blog from '../components/BlogCard';
 import { useMatch } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useBlog } from '../hooks';
 
 export default function BlogDetails() {
+  const loggedUser = useSelector((state) => state.user?.loggedUser);
   const selectedBlogId = useMatch('/blogs/:id')?.params.id;
   const { data: blog, isLoading, error } = useBlog(selectedBlogId);
+
+  // Add isAddedByUser flag to blog data
+  const blogWithUserFlag = blog
+    ? {
+        ...blog,
+        isAddedByUser: blog.user?.id === loggedUser?.id,
+      }
+    : null;
 
   if (isLoading) {
     return (
@@ -22,5 +32,8 @@ export default function BlogDetails() {
     );
   }
 
-  return blog && blog.id && <Blog selectedBlog={blog} />;
+  return (
+    blogWithUserFlag &&
+    blogWithUserFlag.id && <Blog selectedBlog={blogWithUserFlag} />
+  );
 }

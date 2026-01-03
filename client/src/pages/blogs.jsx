@@ -1,22 +1,30 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useBlogs } from '../hooks';
 import BlogList from '../components/BlogList';
 import CreateBlog from './createBlog';
 
 export default function Blogs() {
+  const loggedUser = useSelector((state) => state.user?.loggedUser);
   const { data: blogs = [], isLoading, error } = useBlogs();
+
+  // Add isAddedByUser flag to blogs data
+  const blogsWithUserFlag = blogs.map((blog) => ({
+    ...blog,
+    isAddedByUser: blog.user?.id === loggedUser?.id,
+  }));
 
   const [searchTitle, setSearchTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
 
   // Filter by title and genre (genre is an array)
-  const filteredBlogs = blogs.filter((blog) => {
+  const filteredBlogs = blogsWithUserFlag.filter((blog) => {
     const matchesTitle = blog.title
       .toLowerCase()
       .includes(searchTitle.toLowerCase());
     const matchesGenre = selectedGenre
-      ? blog.genre?.includes(selectedGenre)
+      ? blog.genres?.includes(selectedGenre)
       : true;
     return matchesTitle && matchesGenre;
   });
