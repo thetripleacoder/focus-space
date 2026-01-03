@@ -22,5 +22,5 @@ export default function BlogDetails() {
     );
   }
 
-  return blog && <Blog selectedBlog={blog} />;
+  return blog && blog.id && <Blog selectedBlog={blog} />;
 }

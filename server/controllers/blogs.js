@@ -44,7 +44,7 @@ blogsRouter.get('/:id', async (req, res) => {
     .populate('likedBy', { username: 1, name: 1, avatar: 1 });
 
   if (blog) {
-    res.json({ message: 'Successfully retrieved blog', data: blog });
+    res.json(blog);
   } else {
     res.status(404).json({ error: 'No blog found to retrieve' });
   }

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { IconButton, TextField, CircularProgress } from '@mui/material';
@@ -11,13 +11,9 @@ import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import SendIcon from '@mui/icons-material/Send';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Link } from 'react-router-dom';
-import {
-  likeBlog,
-  deleteBlog,
-  addCommentBlog,
-  updateBlogThunk,
-} from '../reducers/blogsReducer';
+import { useUpdateBlog, useDeleteBlog } from '../hooks';
 import { showNotification } from '../reducers/notificationReducer';
+import { likeBlog, addCommentBlog } from '../reducers/blogsReducer';
 import { useField } from '../hooks';
 import Toggleable from './Toggleable';
 
@@ -31,12 +27,24 @@ const BlogCard = ({ selectedBlog }) => {
   const [isSending, setIsSending] = useState(false);
   const [showComments, setShowComments] = useState(false);
 
+  // React Query hooks
+  const updateBlogMutation = useUpdateBlog();
+  const deleteBlogMutation = useDeleteBlog();
+
   // New: edit states
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(selectedBlog?.title || '');
   const [editGenres, setEditGenres] = useState(
     selectedBlog?.genres?.join(', ') || ''
   );
+
+  // Update edit state when selectedBlog changes
+  useEffect(() => {
+    if (selectedBlog && !isEditing) {
+      setEditTitle(selectedBlog.title || '');
+      setEditGenres(selectedBlog.genres?.join(', ') || '');
+    }
+  }, [selectedBlog, isEditing]);
 
   if (!selectedBlog) {
     return <div className='text-center text-gray-500'>Loading...</div>;
@@ -55,23 +63,36 @@ const BlogCard = ({ selectedBlog }) => {
     );
   };
 
-  const handleRemoveBlog = () => {
+  const handleRemoveBlog = async () => {
     if (
       window.confirm(
         `Remove blog "${selectedBlog.title}" by ${selectedBlog.user.name}?`
       )
     ) {
-      dispatch(deleteBlog(selectedBlog.id));
-
-      dispatch(
-        showNotification(
-          {
-            type: 'success',
-            content: `You deleted "${selectedBlog.title}"`,
-          },
-          5
-        )
-      );
+      try {
+        await deleteBlogMutation.mutateAsync(selectedBlog.id);
+        dispatch(
+          showNotification(
+            {
+              type: 'success',
+              content: `You deleted "${selectedBlog.title}"`,
+            },
+            5
+          )
+        );
+      } catch (error) {
+        dispatch(
+          showNotification(
+            {
+              type: 'error',
+              content: `Failed to delete blog: ${
+                error.message || 'Unknown error'
+              }`,
+            },
+            5
+          )
+        );
+      }
     }
   };
 
@@ -102,23 +123,40 @@ const BlogCard = ({ selectedBlog }) => {
   };
 
   // New: save edits
-  const handleSaveEdit = () => {
-    const updated = {
-      ...selectedBlog,
+  const handleSaveEdit = async () => {
+    const updatedBlog = {
       title: editTitle.trim(),
       genres: editGenres
         .split(',')
         .map((g) => g.trim())
         .filter(Boolean),
     };
-    dispatch(updateBlogThunk(updated));
-    dispatch(
-      showNotification(
-        { type: 'success', content: `Blog updated successfully` },
-        5
-      )
-    );
-    setIsEditing(false);
+
+    try {
+      await updateBlogMutation.mutateAsync({
+        id: selectedBlog.id,
+        blog: updatedBlog,
+      });
+      dispatch(
+        showNotification(
+          { type: 'success', content: `Blog updated successfully` },
+          5
+        )
+      );
+      setIsEditing(false);
+    } catch (error) {
+      dispatch(
+        showNotification(
+          {
+            type: 'error',
+            content: `Failed to update blog: ${
+              error.message || 'Unknown error'
+            }`,
+          },
+          5
+        )
+      );
+    }
   };
 
   return (
@@ -149,15 +187,19 @@ const BlogCard = ({ selectedBlog }) => {
               <div className='flex items-center gap-4'>
                 <div>
                   {selectedBlog.user.avatar ? (
-                    <img
-                      src={selectedBlog.user.avatar}
-                      alt={`${selectedBlog.user.name}'s avatar`}
-                      className='w-10 h-10 rounded-full object-cover border border-gray-300'
-                    />
+                    <Link to={`/users/${selectedBlog.user.id}`}>
+                      <img
+                        src={selectedBlog.user.avatar}
+                        alt={`${selectedBlog.user.name}'s avatar`}
+                        className='w-10 h-10 rounded-full object-cover border border-gray-300 cursor-pointer hover:opacity-80 transition-opacity'
+                      />
+                    </Link>
                   ) : (
-                    <div className='w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold'>
-                      {selectedBlog.user.name?.charAt(0).toUpperCase() ?? 'U'}
-                    </div>
+                    <Link to={`/users/${selectedBlog.user.id}`}>
+                      <div className='w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold cursor-pointer hover:bg-blue-700 transition-colors'>
+                        {selectedBlog.user.name?.charAt(0).toUpperCase() ?? 'U'}
+                      </div>
+                    </Link>
                   )}
                 </div>
                 <h2 className='text-xl font-bold text-gray-900 hover:text-blue-600 transition'>
@@ -194,8 +236,13 @@ const BlogCard = ({ selectedBlog }) => {
                     color='success'
                     size='small'
                     onClick={handleSaveEdit}
+                    disabled={updateBlogMutation.isPending}
                   >
-                    <SaveIcon />
+                    {updateBlogMutation.isPending ? (
+                      <CircularProgress size={16} color='inherit' />
+                    ) : (
+                      <SaveIcon />
+                    )}
                   </IconButton>
                   <IconButton
                     color='inherit'
@@ -218,8 +265,13 @@ const BlogCard = ({ selectedBlog }) => {
                     onClick={handleRemoveBlog}
                     color='error'
                     size='small'
+                    disabled={deleteBlogMutation.isPending}
                   >
-                    <DeleteIcon />
+                    {deleteBlogMutation.isPending ? (
+                      <CircularProgress size={16} color='inherit' />
+                    ) : (
+                      <DeleteIcon />
+                    )}
                   </IconButton>
                 </>
               )}
@@ -352,14 +404,14 @@ const BlogCard = ({ selectedBlog }) => {
 
 BlogCard.propTypes = {
   selectedBlog: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.string,
     title: PropTypes.string.isRequired,
     createdAt: PropTypes.string.isRequired,
     user: PropTypes.shape({
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       username: PropTypes.string.isRequired,
-      avatar: PropTypes.string.isRequired,
+      avatar: PropTypes.string,
     }),
     likes: PropTypes.number.isRequired,
     isAddedByUser: PropTypes.bool,
