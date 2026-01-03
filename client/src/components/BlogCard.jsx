@@ -11,9 +11,13 @@ import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import SendIcon from '@mui/icons-material/Send';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Link } from 'react-router-dom';
-import { useUpdateBlog, useDeleteBlog } from '../hooks';
+import {
+  useUpdateBlog,
+  useDeleteBlog,
+  useLikeBlog,
+  useAddComment,
+} from '../hooks';
 import { showNotification } from '../reducers/notificationReducer';
-import { likeBlog, addCommentBlog } from '../reducers/blogsReducer';
 import { useField } from '../hooks';
 import Toggleable from './Toggleable';
 
@@ -24,12 +28,13 @@ const BlogCard = ({ selectedBlog }) => {
   const commentToggleRef = useRef();
   const commentsEndRef = useRef(null);
   const user = useSelector((state) => state.user?.loggedUser ?? {});
-  const [isSending, setIsSending] = useState(false);
   const [showComments, setShowComments] = useState(false);
 
   // React Query hooks
   const updateBlogMutation = useUpdateBlog();
   const deleteBlogMutation = useDeleteBlog();
+  const likeBlogMutation = useLikeBlog();
+  const addCommentMutation = useAddComment();
 
   // New: edit states
   const [isEditing, setIsEditing] = useState(false);
@@ -50,17 +55,29 @@ const BlogCard = ({ selectedBlog }) => {
     return <div className='text-center text-gray-500'>Loading...</div>;
   }
 
-  const handleLikeBlog = () => {
-    dispatch(likeBlog(selectedBlog));
-    dispatch(
-      showNotification(
-        {
-          type: 'success',
-          content: `You liked "${selectedBlog.title}"`,
-        },
-        5
-      )
-    );
+  const handleLikeBlog = async () => {
+    try {
+      await likeBlogMutation.mutateAsync({ blogId: selectedBlog.id });
+      dispatch(
+        showNotification(
+          {
+            type: 'success',
+            content: `You liked "${selectedBlog.title}"`,
+          },
+          5
+        )
+      );
+    } catch (error) {
+      dispatch(
+        showNotification(
+          {
+            type: 'error',
+            content: `Failed to like blog: ${error.message || 'Unknown error'}`,
+          },
+          5
+        )
+      );
+    }
   };
 
   const handleRemoveBlog = async () => {
@@ -100,26 +117,40 @@ const BlogCard = ({ selectedBlog }) => {
     const newComment = comment?.inputProps?.value?.trim();
     if (!newComment || !user.id) return;
 
-    setIsSending(true);
+    try {
+      await addCommentMutation.mutateAsync({
+        blogId: selectedBlog.id,
+        comment: newComment,
+      });
+      comment.reset();
+      dispatch(
+        showNotification(
+          {
+            type: 'success',
+            content: `You commented on "${selectedBlog.title}"`,
+          },
+          5
+        )
+      );
 
-    await dispatch(addCommentBlog(selectedBlog, newComment, user));
-    comment.reset();
-    dispatch(
-      showNotification(
-        {
-          type: 'success',
-          content: `You commented on "${selectedBlog.title}"`,
-        },
-        5
-      )
-    );
+      commentToggleRef.current?.toggleVisibility();
 
-    setIsSending(false);
-    commentToggleRef.current?.toggleVisibility();
-
-    setTimeout(() => {
-      commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+      setTimeout(() => {
+        commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } catch (error) {
+      dispatch(
+        showNotification(
+          {
+            type: 'error',
+            content: `Failed to add comment: ${
+              error.message || 'Unknown error'
+            }`,
+          },
+          5
+        )
+      );
+    }
   };
 
   // New: save edits
@@ -338,9 +369,12 @@ const BlogCard = ({ selectedBlog }) => {
               size='medium'
               data-testid='add-comment-button'
               className='!bg-green-500 hover:!bg-green-600 !text-white !rounded-full shadow-sm'
-              disabled={!comment?.inputProps?.value?.trim() || isSending}
+              disabled={
+                !comment?.inputProps?.value?.trim() ||
+                addCommentMutation.isPending
+              }
             >
-              {isSending ? (
+              {addCommentMutation.isPending ? (
                 <CircularProgress size={20} color='inherit' />
               ) : (
                 <SendIcon />

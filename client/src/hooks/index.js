@@ -7,6 +7,8 @@ export {
   useCreateBlog,
   useUpdateBlog,
   useDeleteBlog,
+  useLikeBlog,
+  useAddComment,
   blogKeys,
 } from './useBlogs';
 

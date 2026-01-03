@@ -65,4 +65,54 @@ const remove = async (id) => {
   return request.then((response) => response.data);
 };
 
-export default { getAll, getOne, create, update, remove, setToken, getToken };
+const like = async (id) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+
+  // Get current blog to calculate new likes count
+  const currentBlog = await getOne(id);
+  const newLikes = (currentBlog.likes || 0) + 1;
+
+  const request = axios.patch(`${baseUrl}/${id}`, { likes: newLikes }, config);
+  return request.then((response) => response.data);
+};
+
+const addComment = async (id, commentText) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+
+  // Get current blog to add to existing comments
+  const currentBlog = await getOne(id);
+  const currentUser = JSON.parse(
+    localStorage.getItem('focus-space-loggedUser')
+  );
+
+  const newComment = {
+    text: commentText.trim(),
+    author: currentUser?.username || 'Anonymous',
+    date: new Date().toISOString(),
+  };
+
+  const updatedComments = [...(currentBlog.comments || []), newComment];
+
+  const request = axios.patch(
+    `${baseUrl}/${id}`,
+    { comments: updatedComments },
+    config
+  );
+  return request.then((response) => response.data);
+};
+
+export default {
+  getAll,
+  getOne,
+  create,
+  update,
+  remove,
+  like,
+  addComment,
+  setToken,
+  getToken,
+};

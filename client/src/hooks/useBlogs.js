@@ -157,3 +157,130 @@ export const useDeleteBlog = () => {
     },
   });
 };
+
+export const useLikeBlog = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ blogId }) => blogService.like(blogId),
+    onMutate: async ({ blogId }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: blogKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: blogKeys.detail(blogId) });
+
+      // Snapshot previous values for rollback
+      const previousBlogs = queryClient.getQueryData(blogKeys.lists());
+      const previousBlogDetail = queryClient.getQueryData(
+        blogKeys.detail(blogId)
+      );
+
+      // Optimistically increment likes
+      queryClient.setQueryData(
+        blogKeys.lists(),
+        (old) =>
+          old?.map((blog) =>
+            blog.id === blogId
+              ? { ...blog, likes: (blog.likes || 0) + 1 }
+              : blog
+          ) || []
+      );
+
+      // Update blog detail if it exists
+      queryClient.setQueryData(blogKeys.detail(blogId), (old) =>
+        old ? { ...old, likes: (old.likes || 0) + 1 } : old
+      );
+
+      return { previousBlogs, previousBlogDetail };
+    },
+    onError: (err, { blogId }, context) => {
+      // Rollback on error
+      if (context?.previousBlogs) {
+        queryClient.setQueryData(blogKeys.lists(), context.previousBlogs);
+      }
+      if (context?.previousBlogDetail) {
+        queryClient.setQueryData(
+          blogKeys.detail(blogId),
+          context.previousBlogDetail
+        );
+      }
+    },
+    onSettled: (data, error, { blogId }) => {
+      // Refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: blogKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: blogKeys.detail(blogId) });
+    },
+  });
+};
+
+export const useAddComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ blogId, comment }) =>
+      blogService.addComment(blogId, comment),
+    onMutate: async ({ blogId, comment }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: blogKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: blogKeys.detail(blogId) });
+
+      // Snapshot previous values for rollback
+      const previousBlogs = queryClient.getQueryData(blogKeys.lists());
+      const previousBlogDetail = queryClient.getQueryData(
+        blogKeys.detail(blogId)
+      );
+
+      // Get current user for optimistic comment
+      const currentUser = queryClient.getQueryData(['user'])?.loggedUser;
+
+      // Create optimistic comment
+      const optimisticComment = {
+        text: comment.trim(),
+        author: currentUser?.username || 'Anonymous',
+        date: new Date().toISOString(),
+      };
+
+      // Optimistically add comment
+      queryClient.setQueryData(
+        blogKeys.lists(),
+        (old) =>
+          old?.map((blog) =>
+            blog.id === blogId
+              ? {
+                  ...blog,
+                  comments: [...(blog.comments || []), optimisticComment],
+                }
+              : blog
+          ) || []
+      );
+
+      // Update blog detail if it exists
+      queryClient.setQueryData(blogKeys.detail(blogId), (old) =>
+        old
+          ? {
+              ...old,
+              comments: [...(old.comments || []), optimisticComment],
+            }
+          : old
+      );
+
+      return { previousBlogs, previousBlogDetail, optimisticComment };
+    },
+    onError: (err, { blogId }, context) => {
+      // Rollback on error
+      if (context?.previousBlogs) {
+        queryClient.setQueryData(blogKeys.lists(), context.previousBlogs);
+      }
+      if (context?.previousBlogDetail) {
+        queryClient.setQueryData(
+          blogKeys.detail(blogId),
+          context.previousBlogDetail
+        );
+      }
+    },
+    onSettled: (data, error, { blogId }) => {
+      // Refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: blogKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: blogKeys.detail(blogId) });
+    },
+  });
+};
