@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Grid, Avatar, IconButton } from '@mui/material';
+import { Box, Avatar, IconButton } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const styles = [
@@ -21,47 +21,53 @@ const AvatarPicker = ({ onSelect, username }) => {
   };
 
   return (
-    <Grid container spacing={2}>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(64px, 1fr))',
+        gap: 2,
+        justifyItems: 'center',
+        maxWidth: 400,
+      }}
+    >
       {styles.map((style) => {
         const url = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(
           username || 'guest'
         )}`;
         return (
-          <Grid item key={style}>
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-              <Avatar
-                src={url}
-                alt={style}
+          <Box key={style} sx={{ position: 'relative' }}>
+            <Avatar
+              src={url}
+              alt={style}
+              sx={{
+                width: 64,
+                height: 64,
+                border:
+                  selected === url
+                    ? '2px solid #1976d2'
+                    : '2px solid transparent',
+                cursor: 'pointer',
+              }}
+              onClick={() => handleSelect(url)}
+            />
+            {selected === url && (
+              <IconButton
+                size='small'
                 sx={{
-                  width: 64,
-                  height: 64,
-                  border:
-                    selected === url
-                      ? '2px solid #1976d2'
-                      : '2px solid transparent',
-                  cursor: 'pointer',
+                  position: 'absolute',
+                  bottom: -8,
+                  right: -8,
+                  color: '#1976d2',
+                  background: 'white',
                 }}
-                onClick={() => handleSelect(url)}
-              />
-              {selected === url && (
-                <IconButton
-                  size='small'
-                  sx={{
-                    position: 'absolute',
-                    bottom: -8,
-                    right: -8,
-                    color: '#1976d2',
-                    background: 'white',
-                  }}
-                >
-                  <CheckCircleIcon fontSize='small' />
-                </IconButton>
-              )}
-            </div>
-          </Grid>
+              >
+                <CheckCircleIcon fontSize='small' />
+              </IconButton>
+            )}
+          </Box>
         );
       })}
-    </Grid>
+    </Box>
   );
 };
 

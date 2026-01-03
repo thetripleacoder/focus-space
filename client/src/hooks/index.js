@@ -10,6 +10,9 @@ export {
   blogKeys,
 } from './useBlogs';
 
+// Auth hooks
+export { useLogin, useRegister, authKeys } from './useAuth';
+
 export const useField = (type) => {
   const [value, setValue] = useState('');
 

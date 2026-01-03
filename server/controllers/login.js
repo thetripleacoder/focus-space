@@ -7,13 +7,42 @@ const { getIO } = require('../utils/socketRegistry'); // 👈 Import registry
 loginRouter.post('/', async (request, response) => {
   const { username, password } = request.body;
 
-  const user = await User.findOne({ username });
+  // Input validation
+  if (
+    !username ||
+    typeof username !== 'string' ||
+    username.trim().length === 0
+  ) {
+    return response.status(400).json({
+      error: {
+        type: 'VALIDATION_ERROR',
+        message: 'Username is required to sign in',
+        field: 'username',
+      },
+    });
+  }
+
+  if (!password || typeof password !== 'string' || password.length === 0) {
+    return response.status(400).json({
+      error: {
+        type: 'VALIDATION_ERROR',
+        message: 'Password is required to sign in',
+        field: 'password',
+      },
+    });
+  }
+
+  const user = await User.findOne({ username: username.trim() });
   const passwordCorrect =
     user === null ? false : await bcrypt.compare(password, user.passwordHash);
 
   if (!(user && passwordCorrect)) {
     return response.status(401).json({
-      error: 'invalid username or password',
+      error: {
+        type: 'AUTHENTICATION_ERROR',
+        message:
+          'Invalid username or password. Please check your credentials and try again.',
+      },
     });
   }
 
