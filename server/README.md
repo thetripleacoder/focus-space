@@ -1,6 +1,6 @@
-# Blog List Server API 🚀
+# Focus Space Server API 🚀
 
-This is the robust backend server for a **Blog List** application, built using the **Node.js/Express** framework. It provides a secured **RESTful API** for blog and user management, featuring **JWT authentication** and **real-time updates** via **Socket.IO** for a dynamic user experience.
+This is the robust backend server for the **Focus Space** productivity platform, built using the **Node.js/Express** framework. It provides a secured **RESTful API** for blog management, user authentication, and real-time collaboration, featuring **JWT authentication**, **toggle like system**, and **real-time updates** via **Socket.IO** for a dynamic user experience.
 
 -----
 
@@ -25,22 +25,24 @@ The server adheres to the **Model-View-Controller (MVC)** pattern (or more accur
 
 The core server setup in **`index.js`** ensures both REST and Socket.IO operate from the same port:
 
-1.  `const server = http.createServer(app);` creates a standard HTTP server using Express.
-2.  `const io = new Server(server, { cors: corsOptions });` initializes the Socket.IO server, binding it to the existing HTTP `server`.
-3.  `setIO(io)` (from `utils/socketRegistry.js`) makes the $\text{io}$ instance accessible globally. This is crucial for **controllers** to trigger real-time updates after database operations.
-4.  `server.listen(config.PORT, ...)` starts the combined server.
+1. `const server = http.createServer(app);` creates a standard HTTP server using Express.
+2. `const io = new Server(server, { cors: corsOptions });` initializes the Socket.IO server, binding it to the existing HTTP `server`.
+3. `setIO(io)` (from `utils/socketRegistry.js`) makes the $\text{io}$ instance accessible globally. This is crucial for **controllers** to trigger real-time updates after database operations.
+4. `server.listen(config.PORT, ...)` starts the combined server.
 
 ### 2\. Secure Middleware Pipeline
 
 The Express pipeline in **`app.js`** enforces security and consistency:
 
-1.  `app.use(cors(corsOptions));` handles Cross-Origin Resource Sharing based on the `FRONTEND_ORIGIN` list defined in `utils/corsConfig.js`.
-2.  `app.use(express.json());` parses JSON request bodies.
-3.  **Authentication Flow for Protected Routes:**
-      * `middleware.tokenExtractor` extracts the JWT from the `Authorization: Bearer ...` header.
-      * The **`blogs`** router is mounted with `middleware.userExtractor`, which verifies the token and fetches the corresponding User object, setting it as `req.user` for authorization checks (e.g., ensuring a user can only delete their own blog).
-4.  **Data Validation and Sanitization:** Custom middleware like `sanitizeAndValidateBlog` (used in blog routes) ensures that only allowed fields are accepted and processed, rejecting requests with unexpected payload keys.
-5.  **Centralized Error Handling:** `middleware.errorHandler` gracefully handles common database (Mongoose `CastError`, `ValidationError`) and authentication (`JsonWebTokenError`) exceptions, returning standardized $\text{400}$ or $\text{401}$ responses.
+1. `app.use(cors(corsOptions));` handles Cross-Origin Resource Sharing based on the `FRONTEND_ORIGIN` list defined in `utils/corsConfig.js`.
+2. `app.use(express.json());` parses JSON request bodies.
+3. **Authentication Flow for Protected Routes:**
+      * `middleware.tokenExtractor` extracts the JWT from the `Authorization: Bearer ...` header (applied globally).
+      * `middleware.userExtractor` verifies the token and fetches the authenticated user (applied selectively to protected routes only).
+      * **Public routes** (GET operations) require no authentication.
+      * **Protected routes** (POST, PATCH, DELETE) use `userExtractor` for authorization checks.
+4. **Data Validation and Sanitization:** Custom middleware like `sanitizeAndValidateBlog` (used in blog routes) ensures that only allowed fields are accepted and processed, rejecting requests with unexpected payload keys.
+5. **Centralized Error Handling:** `middleware.errorHandler` gracefully handles common database (Mongoose `CastError`, `ValidationError`) and authentication (`JsonWebTokenError`) exceptions, returning standardized $\text{400}$ or $\text{401}$ responses.
 
 ### 3\. Real-time Event Broadcasting
 
@@ -55,20 +57,55 @@ Real-time updates are driven from the API controllers:
 
 The pattern is consistently: `getIO().emit('eventName', payload);`.
 
+### 4\. Toggle Like System
+
+The server implements a **one-like-per-user** system using the `likedBy` array in the Blog schema:
+
+* **`POST /api/blogs/:id/like`**: Toggles like status for authenticated users
+* **Database Logic**: Adds/removes user IDs from `likedBy` array, recalculates `likes` count
+* **Authorization**: Requires authentication, validates user permissions
+* **Real-time Updates**: Broadcasts `blogUpdated` events for cross-user synchronization
+
+### 5\. Database Schema Design
+
+**Blog Model** (`models/blog.js`):
+
+```javascript
+{
+  title: String,
+  user: { type: ObjectId, ref: 'User' },
+  genres: [String],
+  comments: [{ text: String, author: String, date: Date }],
+  likedBy: [{ type: ObjectId, ref: 'User' }],  // New: tracks who liked
+  likes: Number,  // Auto-calculated from likedBy.length
+  createdAt: Date
+}
+```
+
+**Key Features**:
+* **Referential Integrity**: `likedBy` array ensures one like per user
+* **Performance**: `likes` count provides fast queries without array aggregation
+* **Population**: User data populated for rich client-side rendering
+
 -----
 
 ## Installation and Setup ⚙️
 
-1.  **Clone the repository:**
+1. **Clone the repository:**
+
     ```bash
     git clone <repository-url>
-    cd blog-list
+    cd focus-space
     ```
-2.  **Install dependencies:**
+
+2. **Install dependencies:**
+
     ```bash
     npm install
     ```
-3.  **Environment Variables:** Create a **`.env`** file for configuration:
+
+3. **Environment Variables:** Create a **`.env`** file for configuration:
+
     ```ini
     PORT=3001
     MONGODB_URI=mongodb://localhost/bloglist_dev
@@ -96,9 +133,11 @@ The pattern is consistently: `getIO().emit('eventName', payload);`.
 | Method | Route | Description | Authentication |
 | :--- | :--- | :--- | :--- |
 | **Blogs** | `GET /api/blogs` | Retrieve all blogs with populated user and like data. | None |
+| | `GET /api/blogs/:id` | Retrieve a single blog with populated user and like data. | None |
 | | `POST /api/blogs` | Create a new blog post. | Required (`userExtractor`) |
+| | `POST /api/blogs/:id/like` | Toggle like/unlike for a blog (one like per user). | Required (`userExtractor`) |
+| | `PATCH /api/blogs/:id` | Update blog content (title, genres, comments). | Required (`userExtractor`) |
 | | `DELETE /api/blogs/:id` | Delete a blog post. | Required & **Ownership** Check |
-| | `PATCH/PUT /api/blogs/:id` | Update or replace a blog post. | None (Updates like counts, comments, etc.) |
 | **Users** | `POST /api/users` | Register a new user account. | None |
 | | `GET /api/users` | Retrieve all users with populated liked posts. | None |
 | **Auth** | `POST /api/login` | Authenticate and receive a JWT token and user profile data. | None |
