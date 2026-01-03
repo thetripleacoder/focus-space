@@ -174,21 +174,60 @@ export const useLikeBlog = () => {
         blogKeys.detail(blogId)
       );
 
-      // Optimistically increment likes
+      // Get current user
+      const currentUser = queryClient.getQueryData(['user'])?.loggedUser;
+      const userId = currentUser?.id;
+
+      // Optimistically toggle like status
       queryClient.setQueryData(
         blogKeys.lists(),
         (old) =>
-          old?.map((blog) =>
-            blog.id === blogId
-              ? { ...blog, likes: (blog.likes || 0) + 1 }
-              : blog
-          ) || []
+          old?.map((blog) => {
+            if (blog.id === blogId) {
+              const currentlyLiked = blog.likedBy?.some(
+                (user) => user.id === userId
+              );
+              if (currentlyLiked) {
+                // Unlike: remove user and decrement count
+                return {
+                  ...blog,
+                  likedBy: blog.likedBy.filter((user) => user.id !== userId),
+                  likes: Math.max(0, (blog.likes || 0) - 1),
+                };
+              } else {
+                // Like: add user and increment count
+                return {
+                  ...blog,
+                  likedBy: [...(blog.likedBy || []), currentUser],
+                  likes: (blog.likes || 0) + 1,
+                };
+              }
+            }
+            return blog;
+          }) || []
       );
 
       // Update blog detail if it exists
-      queryClient.setQueryData(blogKeys.detail(blogId), (old) =>
-        old ? { ...old, likes: (old.likes || 0) + 1 } : old
-      );
+      queryClient.setQueryData(blogKeys.detail(blogId), (old) => {
+        if (!old) return old;
+
+        const currentlyLiked = old.likedBy?.some((user) => user.id === userId);
+        if (currentlyLiked) {
+          // Unlike: remove user and decrement count
+          return {
+            ...old,
+            likedBy: old.likedBy.filter((user) => user.id !== userId),
+            likes: Math.max(0, (old.likes || 0) - 1),
+          };
+        } else {
+          // Like: add user and increment count
+          return {
+            ...old,
+            likedBy: [...(old.likedBy || []), currentUser],
+            likes: (old.likes || 0) + 1,
+          };
+        }
+      });
 
       return { previousBlogs, previousBlogDetail };
     },

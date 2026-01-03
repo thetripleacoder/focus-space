@@ -55,14 +55,21 @@ const BlogCard = ({ selectedBlog }) => {
     return <div className='text-center text-gray-500'>Loading...</div>;
   }
 
+  // Check if current user has liked this blog
+  const hasLiked =
+    Array.isArray(selectedBlog?.likedBy) &&
+    selectedBlog.likedBy.some((likedUser) => likedUser?.id === user?.id) &&
+    !!user?.id;
+
   const handleLikeBlog = async () => {
     try {
       await likeBlogMutation.mutateAsync({ blogId: selectedBlog.id });
+      const action = hasLiked ? 'unliked' : 'liked';
       dispatch(
         showNotification(
           {
             type: 'success',
-            content: `You liked "${selectedBlog.title}"`,
+            content: `You ${action} "${selectedBlog.title}"`,
           },
           5
         )
@@ -72,7 +79,9 @@ const BlogCard = ({ selectedBlog }) => {
         showNotification(
           {
             type: 'error',
-            content: `Failed to like blog: ${error.message || 'Unknown error'}`,
+            content: `Failed to ${hasLiked ? 'unlike' : 'like'} blog: ${
+              error.message || 'Unknown error'
+            }`,
           },
           5
         )
@@ -333,6 +342,7 @@ const BlogCard = ({ selectedBlog }) => {
             color='primary'
             size='small'
             data-testid='like-button'
+            disabled={!user?.id} // Disable if user not logged in
           >
             <FavoriteIcon />
             <span className='ml-2'>{selectedBlog.likes}</span>
@@ -448,6 +458,13 @@ BlogCard.propTypes = {
       avatar: PropTypes.string,
     }),
     likes: PropTypes.number.isRequired,
+    likedBy: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        username: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+      })
+    ),
     isAddedByUser: PropTypes.bool,
     comments: PropTypes.arrayOf(
       PropTypes.shape({

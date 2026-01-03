@@ -69,7 +69,7 @@ app.use(middleware.requestLogger);
 app.use(middleware.tokenExtractor);
 
 // 📦 Routes
-app.use('/api/blogs', middleware.userExtractor, blogsRouter); // io accessed via registry
+app.use('/api/blogs', blogsRouter); // Public blog routes (auth handled per route)
 // app.use('/api/users', registerLimiter, usersRouter); // Apply registration rate limiting - COMMENTED OUT
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRouter); // Apply login rate limiting - COMMENTED OUT

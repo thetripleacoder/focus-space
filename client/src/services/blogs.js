@@ -70,11 +70,7 @@ const like = async (id) => {
     headers: { Authorization: token },
   };
 
-  // Get current blog to calculate new likes count
-  const currentBlog = await getOne(id);
-  const newLikes = (currentBlog.likes || 0) + 1;
-
-  const request = axios.patch(`${baseUrl}/${id}`, { likes: newLikes }, config);
+  const request = axios.post(`${baseUrl}/${id}/like`, {}, config);
   return request.then((response) => response.data);
 };
 

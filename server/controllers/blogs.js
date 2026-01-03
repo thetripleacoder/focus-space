@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Blog = require('../models/blog');
 const express = require('express');
 const middleware = require('../utils/middleware');
@@ -6,36 +7,18 @@ require('express-async-errors');
 
 const blogsRouter = express.Router();
 
+// Public routes (no authentication required)
 blogsRouter.get('/', async (req, res) => {
-  const blogs = await Blog.find({})
-    .populate('user', { username: 1, name: 1, avatar: 1 })
-    .populate('likedBy', { username: 1, name: 1 });
+  try {
+    const blogs = await Blog.find({})
+      .populate('user', { username: 1, name: 1, avatar: 1 })
+      .populate('likedBy', { username: 1, name: 1 });
 
-  res.json(blogs);
-});
-
-blogsRouter.post('/', middleware.sanitizeAndValidateBlog, async (req, res) => {
-  const { sanitizedBody } = req;
-
-  if (!sanitizedBody.title || typeof sanitizedBody.title !== 'string') {
-    return res.status(400).json({ error: 'Missing or invalid title' });
+    res.json(blogs);
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    res.status(500).json({ error: 'Failed to fetch blogs' });
   }
-
-  const blog = new Blog({
-    ...sanitizedBody,
-    genres: Array.isArray(sanitizedBody.genres) ? sanitizedBody.genres : [],
-    user: req.user.id,
-  });
-
-  const savedBlog = await blog.save();
-  const populatedBlog = await savedBlog.populate('user', {
-    username: 1,
-    name: 1,
-    avatar: 1,
-  });
-
-  getIO().emit('blogCreated', populatedBlog); // ✅ Emit to all clients
-  res.status(201).json(populatedBlog);
 });
 
 blogsRouter.get('/:id', async (req, res) => {
@@ -50,7 +33,37 @@ blogsRouter.get('/:id', async (req, res) => {
   }
 });
 
-blogsRouter.delete('/:id', async (req, res) => {
+// Protected routes (authentication required)
+blogsRouter.post(
+  '/',
+  middleware.userExtractor,
+  middleware.sanitizeAndValidateBlog,
+  async (req, res) => {
+    const { sanitizedBody } = req;
+
+    if (!sanitizedBody.title || typeof sanitizedBody.title !== 'string') {
+      return res.status(400).json({ error: 'Missing or invalid title' });
+    }
+
+    const blog = new Blog({
+      ...sanitizedBody,
+      genres: Array.isArray(sanitizedBody.genres) ? sanitizedBody.genres : [],
+      user: req.user.id,
+    });
+
+    const savedBlog = await blog.save();
+    const populatedBlog = await savedBlog.populate('user', {
+      username: 1,
+      name: 1,
+      avatar: 1,
+    });
+
+    getIO().emit('blogCreated', populatedBlog); // ✅ Emit to all clients
+    res.status(201).json(populatedBlog);
+  }
+);
+
+blogsRouter.delete('/:id', middleware.userExtractor, async (req, res) => {
   const blog = await Blog.findById(req.params.id);
 
   if (!blog) {
@@ -66,8 +79,39 @@ blogsRouter.delete('/:id', async (req, res) => {
   res.status(204).end();
 });
 
+blogsRouter.post('/:id/like', middleware.userExtractor, async (req, res) => {
+  const blog = await Blog.findById(req.params.id);
+
+  if (!blog) {
+    return res.status(404).json({ error: 'Blog not found' });
+  }
+
+  const userId = req.user.id;
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+  const isLiked = blog.likedBy.some((id) => id.toString() === userId);
+
+  if (isLiked) {
+    // Unlike: remove user from likedBy array
+    blog.likedBy = blog.likedBy.filter((id) => id.toString() !== userId);
+  } else {
+    // Like: add user to likedBy array
+    blog.likedBy.push(userObjectId);
+  }
+
+  // Update likes count based on array length
+  blog.likes = blog.likedBy.length;
+
+  await blog.save();
+  await blog.populate('user', { username: 1, name: 1, avatar: 1 });
+  await blog.populate('likedBy', { username: 1, name: 1 });
+
+  getIO().emit('blogUpdated', blog);
+  res.json(blog);
+});
+
 blogsRouter.patch(
   '/:id',
+  middleware.userExtractor,
   middleware.sanitizeAndValidateBlog,
   async (req, res) => {
     const result = await Blog.findByIdAndUpdate(
@@ -76,29 +120,6 @@ blogsRouter.patch(
       {
         new: true,
         runValidators: true,
-      }
-    ).populate('user', { id: 1, name: 1, username: 1, avatar: 1 });
-
-    if (!result) {
-      return res.status(404).json({ error: 'No blog found to update' });
-    }
-
-    getIO().emit('blogUpdated', result); // ✅ Emit update
-    res.status(200).json(result);
-  }
-);
-
-blogsRouter.put(
-  '/:id',
-  middleware.sanitizeAndValidateBlog,
-  async (req, res) => {
-    const result = await Blog.findByIdAndUpdate(
-      req.params.id,
-      req.sanitizedBody,
-      {
-        new: true,
-        runValidators: true,
-        overwrite: true,
       }
     ).populate('user', { id: 1, name: 1, username: 1, avatar: 1 });
 
