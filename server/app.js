@@ -12,6 +12,9 @@ const corsOptions = require('./utils/corsConfig');
 const blogsRouter = require('./controllers/blogs');
 const usersRouter = require('./controllers/users');
 const loginRouter = require('./controllers/login');
+const tasksRouter = require('./controllers/tasks');
+const journalRouter = require('./controllers/journal');
+const pomodoroRouter = require('./controllers/pomodoro');
 
 // Rate limiting for auth endpoints - COMMENTED OUT
 /*
@@ -73,6 +76,9 @@ app.use('/api/blogs', blogsRouter); // Public blog routes (auth handled per rout
 // app.use('/api/users', registerLimiter, usersRouter); // Apply registration rate limiting - COMMENTED OUT
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRouter); // Apply login rate limiting - COMMENTED OUT
+app.use('/api/tasks', tasksRouter);
+app.use('/api/journal', journalRouter);
+app.use('/api/pomodoro', pomodoroRouter);
 
 // 🧪 Test routes
 if (process.env.NODE_ENV === 'test') {

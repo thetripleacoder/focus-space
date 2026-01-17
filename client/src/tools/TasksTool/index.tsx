@@ -1,46 +1,71 @@
-import { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, Typography } from '@mui/material';
 import TaskInput from './TaskInput';
 import TaskList from './TaskList';
+import taskService from '../../services/tasks';
 
-const STORAGE_KEY = 'focus-space-tasks';
+const taskKeys = {
+  all: ['tasks'],
+  lists: () => [...taskKeys.all, 'list'],
+};
 
 export default function TasksTool() {
-  const [tasks, setTasks] = useState(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    try {
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
+  const queryClient = useQueryClient();
+
+  const { data: tasks = [], isLoading } = useQuery({
+    queryKey: taskKeys.lists(),
+    queryFn: taskService.getAll,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const updated = localStorage.getItem(STORAGE_KEY);
-      if (updated) setTasks(JSON.parse(updated));
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  const createTaskMutation = useMutation({
+    mutationFn: taskService.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
+    },
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: ({ id, task }: { id: string; task: any }) =>
+      taskService.update(id, task),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
+    },
+  });
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: taskService.remove,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
+    },
+  });
 
   const addTask = (text: string, priority: string) => {
-    const newTasks = [...tasks, { text, priority }];
-    setTasks(newTasks);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newTasks));
+    createTaskMutation.mutate({ text, priority: priority.toLowerCase() });
   };
 
-  const removeTask = (index: number) => {
-    const updated = tasks.filter((_, i) => i !== index);
-    setTasks(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  const toggleTask = (id: string, completed: boolean) => {
+    updateTaskMutation.mutate({ id, task: { completed } });
   };
+
+  const removeTask = (id: string) => {
+    deleteTaskMutation.mutate(id);
+  };
+
+  if (isLoading) {
+    return (
+      <Box display='flex' flexDirection='column' gap={2}>
+        <Typography variant='h6'>🗂️ Task Prioritizer</Typography>
+        <Typography>Loading tasks...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box display='flex' flexDirection='column' gap={2}>
       <Typography variant='h6'>🗂️ Task Prioritizer</Typography>
       <TaskInput onAdd={addTask} />
-      <TaskList tasks={tasks} onRemove={removeTask} />
+      <TaskList tasks={tasks} onToggle={toggleTask} onRemove={removeTask} />
     </Box>
   );
 }

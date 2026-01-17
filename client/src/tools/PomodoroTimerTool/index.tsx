@@ -30,7 +30,7 @@ const PomodoroTimerTool = ({
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ isFocus, secondsLeft, isRunning })
+      JSON.stringify({ isFocus, secondsLeft, isRunning }),
     );
   }, [isFocus, secondsLeft, isRunning]);
 

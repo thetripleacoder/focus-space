@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 import { useRegister } from '../hooks';
 import { showNotification } from '../reducers/notificationReducer';
 import AvatarPicker from '../components/AvatarPicker';
+import PasswordField from './PasswordField';
 
 const RegisterForm = () => {
   const dispatch = useDispatch();
@@ -147,8 +148,8 @@ const RegisterForm = () => {
             type: 'success',
             content: `Account created successfully! Welcome, ${username}!`,
           },
-          5
-        )
+          5,
+        ),
       );
 
       navigate('/login');
@@ -263,38 +264,26 @@ const RegisterForm = () => {
           </div>
 
           <div>
-            <TextField
-              fullWidth
+            <PasswordField
               label='Password'
-              variant='outlined'
-              type='password'
               value={formData.password}
               onChange={handleChange('password')}
               onBlur={handleBlur('password')}
               error={touched.password && !!errors.password}
               helperText={touched.password && errors.password}
               disabled={registerMutation.isPending}
-              InputProps={{
-                style: { borderRadius: '12px' },
-              }}
             />
           </div>
 
           <div>
-            <TextField
-              fullWidth
+            <PasswordField
               label='Confirm Password'
-              variant='outlined'
-              type='password'
               value={formData.confirmPassword}
               onChange={handleChange('confirmPassword')}
               onBlur={handleBlur('confirmPassword')}
               error={touched.confirmPassword && !!errors.confirmPassword}
               helperText={touched.confirmPassword && errors.confirmPassword}
               disabled={registerMutation.isPending}
-              InputProps={{
-                style: { borderRadius: '12px' },
-              }}
             />
           </div>
 

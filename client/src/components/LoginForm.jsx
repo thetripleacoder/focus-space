@@ -5,6 +5,7 @@ import { Button, TextField, Alert, CircularProgress } from '@mui/material';
 import { useLogin } from '../hooks';
 import { showNotification } from '../reducers/notificationReducer';
 import { loginUser } from '../reducers/userReducer';
+import PasswordField from './PasswordField';
 
 const LoginForm = () => {
   const dispatch = useDispatch();
@@ -77,8 +78,8 @@ const LoginForm = () => {
             type: 'success',
             content: `Welcome back, ${user.username}!`,
           },
-          5
-        )
+          5,
+        ),
       );
 
       navigate('/');
@@ -126,20 +127,14 @@ const LoginForm = () => {
           </div>
 
           <div>
-            <TextField
-              fullWidth
+            <PasswordField
               label='Password'
-              variant='outlined'
-              type='password'
               value={formData.password}
               onChange={handleChange('password')}
               onBlur={handleBlur('password')}
               error={touched.password && !!errors.password}
               helperText={touched.password && errors.password}
               disabled={loginMutation.isPending}
-              InputProps={{
-                style: { borderRadius: '12px' },
-              }}
             />
           </div>
 

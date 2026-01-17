@@ -16,43 +16,43 @@ export default function JournalList({
   entries,
   onRemove,
 }: {
-  entries: { note: string; timestamp: string }[];
-  onRemove: (index: number) => void;
+  entries: { id: string; note: string; timestamp: string }[];
+  onRemove: (id: string) => void;
 }) {
-  const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const handleConfirm = () => {
-    if (confirmIndex !== null) {
-      onRemove(confirmIndex);
-      setConfirmIndex(null);
+    if (confirmId !== null) {
+      onRemove(confirmId);
+      setConfirmId(null);
     }
   };
 
   return (
     <Box>
       <List>
-        {entries.map((entry, index) => (
+        {entries.map((entry) => (
           <ListItem
-            key={index}
+            key={entry.id}
             alignItems='flex-start'
             secondaryAction={
-              <IconButton edge='end' onClick={() => setConfirmIndex(index)}>
+              <IconButton edge='end' onClick={() => setConfirmId(entry.id)}>
                 <DeleteIcon />
               </IconButton>
             }
           >
-            <ListItemText primary={entry.note} secondary={entry.timestamp} />
+            <ListItemText
+              primary={entry.note}
+              secondary={new Date(entry.timestamp).toLocaleString()}
+            />
           </ListItem>
         ))}
       </List>
 
-      <Dialog
-        open={confirmIndex !== null}
-        onClose={() => setConfirmIndex(null)}
-      >
+      <Dialog open={confirmId !== null} onClose={() => setConfirmId(null)}>
         <DialogTitle>Delete this journal entry?</DialogTitle>
         <DialogActions>
-          <Button onClick={() => setConfirmIndex(null)}>Cancel</Button>
+          <Button onClick={() => setConfirmId(null)}>Cancel</Button>
           <Button onClick={handleConfirm} color='error'>
             Delete
           </Button>

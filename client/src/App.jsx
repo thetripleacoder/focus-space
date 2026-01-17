@@ -40,9 +40,29 @@ const App = () => {
         if (newUser?.token) {
           dispatch(setUser(newUser));
           blogService.setToken(newUser.token);
+          // Set tokens for tool services
+          import('./services/tasks').then((tasks) =>
+            tasks.default.setToken(newUser.token),
+          );
+          import('./services/journal').then((journal) =>
+            journal.default.setToken(newUser.token),
+          );
+          import('./services/pomodoro').then((pomodoro) =>
+            pomodoro.default.setToken(newUser.token),
+          );
         } else {
           dispatch(logout());
           blogService.setToken(null);
+          // Clear tokens for tool services
+          import('./services/tasks').then((tasks) =>
+            tasks.default.setToken(null),
+          );
+          import('./services/journal').then((journal) =>
+            journal.default.setToken(null),
+          );
+          import('./services/pomodoro').then((pomodoro) =>
+            pomodoro.default.setToken(null),
+          );
         }
       }
     };
@@ -55,6 +75,16 @@ const App = () => {
   useEffect(() => {
     if (loggedUser?.token) {
       blogService.setToken(loggedUser.token);
+      // Set tokens for tool services
+      import('./services/tasks').then((tasks) =>
+        tasks.default.setToken(loggedUser.token),
+      );
+      import('./services/journal').then((journal) =>
+        journal.default.setToken(loggedUser.token),
+      );
+      import('./services/pomodoro').then((pomodoro) =>
+        pomodoro.default.setToken(loggedUser.token),
+      );
       dispatch(initializeUsers());
     }
   }, [loggedUser, dispatch]);

@@ -28,4 +28,7 @@ export const registerSocketListeners = (dispatch, queryClient) => {
     dispatch(initializeUsers()); // Refresh user list if needed
     dispatch(showNotification(`${user.username} just logged in`, 'info'));
   });
+
+  // Note: Tool-related socket events removed - relying on optimistic updates
+  // for personal productivity tools (tasks, journal) instead of real-time sync
 };
