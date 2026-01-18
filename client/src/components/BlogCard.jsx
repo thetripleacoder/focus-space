@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { IconButton, TextField, CircularProgress } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -40,7 +41,7 @@ const BlogCard = ({ selectedBlog }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(selectedBlog?.title || '');
   const [editGenres, setEditGenres] = useState(
-    selectedBlog?.genres?.join(', ') || ''
+    selectedBlog?.genres?.join(', ') || '',
   );
 
   // Update edit state when selectedBlog changes
@@ -71,8 +72,8 @@ const BlogCard = ({ selectedBlog }) => {
             type: 'success',
             content: `You ${action} "${selectedBlog.title}"`,
           },
-          5
-        )
+          5,
+        ),
       );
     } catch (error) {
       dispatch(
@@ -83,8 +84,8 @@ const BlogCard = ({ selectedBlog }) => {
               error.message || 'Unknown error'
             }`,
           },
-          5
-        )
+          5,
+        ),
       );
     }
   };
@@ -92,7 +93,7 @@ const BlogCard = ({ selectedBlog }) => {
   const handleRemoveBlog = async () => {
     if (
       window.confirm(
-        `Remove blog "${selectedBlog.title}" by ${selectedBlog.user.name}?`
+        `Remove blog "${selectedBlog.title}" by ${selectedBlog.user.name}?`,
       )
     ) {
       try {
@@ -103,8 +104,8 @@ const BlogCard = ({ selectedBlog }) => {
               type: 'success',
               content: `You deleted "${selectedBlog.title}"`,
             },
-            5
-          )
+            5,
+          ),
         );
       } catch (error) {
         dispatch(
@@ -115,8 +116,8 @@ const BlogCard = ({ selectedBlog }) => {
                 error.message || 'Unknown error'
               }`,
             },
-            5
-          )
+            5,
+          ),
         );
       }
     }
@@ -138,8 +139,8 @@ const BlogCard = ({ selectedBlog }) => {
             type: 'success',
             content: `You commented on "${selectedBlog.title}"`,
           },
-          5
-        )
+          5,
+        ),
       );
 
       commentToggleRef.current?.toggleVisibility();
@@ -156,8 +157,8 @@ const BlogCard = ({ selectedBlog }) => {
               error.message || 'Unknown error'
             }`,
           },
-          5
-        )
+          5,
+        ),
       );
     }
   };
@@ -180,8 +181,8 @@ const BlogCard = ({ selectedBlog }) => {
       dispatch(
         showNotification(
           { type: 'success', content: `Blog updated successfully` },
-          5
-        )
+          5,
+        ),
       );
       setIsEditing(false);
     } catch (error) {
@@ -193,8 +194,8 @@ const BlogCard = ({ selectedBlog }) => {
               error.message || 'Unknown error'
             }`,
           },
-          5
-        )
+          5,
+        ),
       );
     }
   };
@@ -339,12 +340,11 @@ const BlogCard = ({ selectedBlog }) => {
           <span className='font-semibold text-blue-600'></span>
           <IconButton
             onClick={handleLikeBlog}
-            color='primary'
             size='small'
             data-testid='like-button'
             disabled={!user?.id} // Disable if user not logged in
           >
-            <FavoriteIcon />
+            {hasLiked ? <FavoriteIcon color='error' /> : <FavoriteBorderIcon />}
             <span className='ml-2'>{selectedBlog.likes}</span>
           </IconButton>
           <IconButton
@@ -463,7 +463,7 @@ BlogCard.propTypes = {
         id: PropTypes.string.isRequired,
         username: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
-      })
+      }),
     ),
     isAddedByUser: PropTypes.bool,
     comments: PropTypes.arrayOf(
@@ -471,7 +471,7 @@ BlogCard.propTypes = {
         author: PropTypes.string,
         text: PropTypes.string,
         date: PropTypes.string,
-      })
+      }),
     ),
     genres: PropTypes.array.isRequired,
   }),
