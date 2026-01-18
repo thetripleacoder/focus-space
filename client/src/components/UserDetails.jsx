@@ -1,10 +1,14 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import BlogCard from './BlogCard';
 import { useBlogs } from '../hooks';
+import FollowButton from './FollowButton';
+import FollowStats from './FollowStats';
 
 const UserDetails = ({ user }) => {
   const { data: blogs = [] } = useBlogs();
+  const currentUser = useSelector((state) => state.user.loggedUser);
 
   if (!user) {
     return (
@@ -21,35 +25,44 @@ const UserDetails = ({ user }) => {
   }));
 
   const userBlogs = blogsWithUserFlag.filter(
-    (blog) => blog.user.id === user.id
+    (blog) => blog.user.id === user.id,
   );
   const sortedBlogs = [...userBlogs].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
   );
   const likedPosts = blogs.filter((blog) =>
-    user.likedPosts?.some((id) => id === blog.id || id === blog._id?.toString())
+    user.likedPosts?.some(
+      (id) => id === blog.id || id === blog._id?.toString(),
+    ),
   );
 
   return (
     <div className='max-w-4xl mx-auto mt-10 px-4 space-y-10'>
       {/* Profile Header */}
-      <div className='flex items-center gap-4'>
-        {user.avatar ? (
-          <img
-            src={user.avatar}
-            alt={`${user.name}'s avatar`}
-            className='w-16 h-16 rounded-full object-cover border border-gray-300'
-          />
-        ) : (
-          <div className='w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold'>
-            {user.name?.charAt(0).toUpperCase() ?? 'U'}
-          </div>
-        )}
+      <div className='flex items-start justify-between'>
+        <div className='flex items-center gap-4'>
+          {user.avatar ? (
+            <img
+              src={user.avatar}
+              alt={`${user.name}'s avatar`}
+              className='w-16 h-16 rounded-full object-cover border border-gray-300'
+            />
+          ) : (
+            <div className='w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold'>
+              {user.name?.charAt(0).toUpperCase() ?? 'U'}
+            </div>
+          )}
 
-        <div>
-          <h1 className='text-2xl font-bold text-gray-800'>{user.name}</h1>
-          <p className='text-sm text-gray-500'>@{user.username}</p>
+          <div>
+            <h1 className='text-2xl font-bold text-gray-800'>{user.name}</h1>
+            <p className='text-sm text-gray-500'>@{user.username}</p>
+            <FollowStats userId={user.id} username={user.username} />
+          </div>
         </div>
+
+        {currentUser && (
+          <FollowButton targetUserId={user.id} currentUserId={currentUser.id} />
+        )}
       </div>
 
       {/* User's Own Posts */}
@@ -110,7 +123,7 @@ UserDetails.propTypes = {
     avatar: PropTypes.string,
     username: PropTypes.string.isRequired,
     likedPosts: PropTypes.arrayOf(
-      PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+      PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     ),
   }),
 };

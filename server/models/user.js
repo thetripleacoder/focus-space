@@ -16,10 +16,22 @@ const userSchema = new mongoose.Schema(
         ref: 'Blog',
       },
     ],
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     strict: true, // ✅ Discards unknown fields during save/create
-  }
+  },
 );
 
 userSchema.set('toJSON', {

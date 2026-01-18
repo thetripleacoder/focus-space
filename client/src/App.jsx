@@ -85,6 +85,9 @@ const App = () => {
       import('./services/pomodoro').then((pomodoro) =>
         pomodoro.default.setToken(loggedUser.token),
       );
+      import('./services/users').then((users) =>
+        users.default.setToken(loggedUser.token),
+      );
       dispatch(initializeUsers());
     }
   }, [loggedUser, dispatch]);

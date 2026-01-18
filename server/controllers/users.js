@@ -19,7 +19,7 @@ const validateUsername = (username) => {
   }
   if (!/^[a-zA-Z0-9_]+$/.test(username)) {
     throw new Error(
-      'Username can only contain letters (a-z, A-Z), numbers (0-9), and underscores (_)'
+      'Username can only contain letters (a-z, A-Z), numbers (0-9), and underscores (_)',
     );
   }
   return true;
@@ -37,7 +37,7 @@ const validatePassword = (password) => {
   }
   if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
     throw new Error(
-      'Password must contain at least one uppercase letter (A-Z), one lowercase letter (a-z), and one number (0-9)'
+      'Password must contain at least one uppercase letter (A-Z), one lowercase letter (a-z), and one number (0-9)',
     );
   }
   return true;
@@ -118,10 +118,10 @@ usersRouter.post(
             field: error.message.includes('Username')
               ? 'username'
               : error.message.includes('Password')
-              ? 'password'
-              : error.message.includes('name')
-              ? 'name'
-              : 'avatar',
+                ? 'password'
+                : error.message.includes('name')
+                  ? 'name'
+                  : 'avatar',
           },
         });
       }
@@ -149,7 +149,7 @@ usersRouter.post(
         },
       });
     }
-  }
+  },
 );
 
 // Get all users with liked posts populated
@@ -170,6 +170,178 @@ usersRouter.get('/', async (request, response) => {
         details:
           process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
+    });
+  }
+});
+
+// Follow a user
+usersRouter.post('/:id/follow', middleware.userExtractor, async (req, res) => {
+  try {
+    const userToFollow = await User.findById(req.params.id);
+    if (!userToFollow) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const currentUser = await User.findById(req.user.id);
+    if (!currentUser) {
+      return res.status(404).json({ error: 'Current user not found' });
+    }
+
+    // Check if already following
+    if (currentUser.following.includes(userToFollow._id)) {
+      return res.status(400).json({ error: 'Already following this user' });
+    }
+
+    // Prevent self-following
+    if (currentUser._id.toString() === userToFollow._id.toString()) {
+      return res.status(400).json({ error: 'Cannot follow yourself' });
+    }
+
+    // Add to following list of current user
+    currentUser.following.push(userToFollow._id);
+    await currentUser.save();
+
+    // Add to followers list of target user
+    userToFollow.followers.push(currentUser._id);
+    await userToFollow.save();
+
+    res.json({
+      message: `Successfully followed ${userToFollow.username}`,
+      following: currentUser.following.length,
+      followers: userToFollow.followers.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to follow user',
+      details:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+});
+
+// Unfollow a user
+usersRouter.delete(
+  '/:id/follow',
+  middleware.userExtractor,
+  async (req, res) => {
+    try {
+      const userToUnfollow = await User.findById(req.params.id);
+      if (!userToUnfollow) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const currentUser = await User.findById(req.user.id);
+      if (!currentUser) {
+        return res.status(404).json({ error: 'Current user not found' });
+      }
+
+      // Check if actually following
+      if (!currentUser.following.includes(userToUnfollow._id)) {
+        return res.status(400).json({ error: 'Not following this user' });
+      }
+
+      // Remove from following list of current user
+      currentUser.following = currentUser.following.filter(
+        (id) => id.toString() !== userToUnfollow._id.toString(),
+      );
+      await currentUser.save();
+
+      // Remove from followers list of target user
+      userToUnfollow.followers = userToUnfollow.followers.filter(
+        (id) => id.toString() !== currentUser._id.toString(),
+      );
+      await userToUnfollow.save();
+
+      res.json({
+        message: `Successfully unfollowed ${userToUnfollow.username}`,
+        following: currentUser.following.length,
+        followers: userToUnfollow.followers.length,
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Failed to unfollow user',
+        details:
+          process.env.NODE_ENV === 'development' ? error.message : undefined,
+      });
+    }
+  },
+);
+
+// Get followers of a user
+usersRouter.get('/:id/followers', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate('followers', {
+      username: 1,
+      name: 1,
+      avatar: 1,
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      userId: user._id,
+      username: user.username,
+      followers: user.followers,
+      count: user.followers.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to get followers',
+      details:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+});
+
+// Get users that a user is following
+usersRouter.get('/:id/following', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate('following', {
+      username: 1,
+      name: 1,
+      avatar: 1,
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      userId: user._id,
+      username: user.username,
+      following: user.following,
+      count: user.following.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to get following list',
+      details:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+});
+
+// Get user's follow stats
+usersRouter.get('/:id/follow-stats', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      userId: user._id,
+      username: user.username,
+      followersCount: user.followers.length,
+      followingCount: user.following.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to get follow stats',
+      details:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
